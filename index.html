@@ -32,7 +32,8 @@ html,body{min-height:100%}
 body{background:var(--kartka);color:var(--atrament);font-family:var(--tekst);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:0}
 #app{max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-button:focus-visible,input:focus-visible,a:focus-visible,.tile:focus-visible{outline:3px solid var(--terakota);outline-offset:2px}
+@media (hover:hover) and (pointer:fine){button:focus-visible,input:focus-visible,a:focus-visible,.tile:focus-visible{outline:3px solid var(--terakota);outline-offset:2px}}
+button:focus:not(:focus-visible){outline:none}
 .mega{font-family:var(--mega);font-weight:800;letter-spacing:0}
 .top{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:0 -16px 14px;background:var(--atrament);color:var(--kartka);border-radius:0 0 22px 22px}
 .top .logo{width:50px;height:50px;border-radius:16px;background:var(--mieta);display:grid;place-items:center;flex:none;overflow:hidden}
@@ -501,6 +502,7 @@ nav.tabs button[aria-current="page"] i{--ikona-srodek:#EFD353}
 .hero .stan{font-size:18px;max-width:52%}
 /* poprawki UX */
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.card .label:focus,.card .label:focus-visible{outline:none}
 .card .label{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;text-align:left;padding:6px 14px 6px 6px;margin:-6px 0 0 -6px;border-radius:99px;background:rgba(252,247,242,.55);color:inherit;max-width:100%}
 .card .label .mega{font-size:17px}
 .label-glos{width:40px;height:40px;border-radius:50%;background:var(--kartka);display:grid;place-items:center;flex:none;color:var(--ciemny)}
@@ -722,33 +724,34 @@ const pula = t => PULA[t.id] || (PULA[t.id] = t.zadania());
 const dlugoscRundy = t => Math.min(DLUGOSC_RUNDY, pula(t).length);
 const progRundy = n => Math.ceil(n * PROG);
 
-/* Czytanie na głos po angielsku (wbudowany głos tabletu). */
+/* Czytanie na głos wbudowanym głosem tabletu. Wybieramy najlepszy dostępny głos w danym języku
+   (wersje „ulepszone/premium/naturalne” mają pierwszeństwo). Gdy tablet nie ma głosu
+   w danym języku, nie czytamy wcale: obcy głos czytający polskie słowa brzmi dziwnie. */
 const mowa = "speechSynthesis" in window;
-function powiedz(tekst){
-  if (!mowa) return;
+function najlepszyGlos(jezyk){
+  if (!mowa) return null;
+  const glosy = speechSynthesis.getVoices().filter(v => v.lang.replace("_", "-").toLowerCase().startsWith(jezyk));
+  if (!glosy.length) return null;
+  const punkty = v => (/(enhanced|premium|ulepsz|natural|neural|wavenet)/i.test(v.name) ? 8 : 0)
+    + (/(zosia|ewa|paulina|kate|serena|daniel|martha|google)/i.test(v.name) ? 3 : 0)
+    + (jezyk === "en" && /en-gb/i.test(v.lang.replace("_", "-")) ? 2 : 0)
+    + (v.localService ? 1 : 0);
+  return glosy.sort((a, b) => punkty(b) - punkty(a))[0];
+}
+const maGlos = jezyk => !!najlepszyGlos(jezyk);
+function czytaj(tekst, jezyk, tempo){
+  const g = najlepszyGlos(jezyk); if (!g) return;
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(tekst);
-    const glosy = speechSynthesis.getVoices();
-    const g = glosy.find(v => /^en-GB/i.test(v.lang)) || glosy.find(v => /^en/i.test(v.lang));
-    if (g) u.voice = g;
-    u.lang = g ? g.lang : "en-GB"; u.rate = 0.8;
+    u.voice = g; u.lang = g.lang; u.rate = tempo; u.pitch = 1;
     speechSynthesis.speak(u);
   } catch (e) {}
 }
-/* Czytanie polecenia po polsku (dla dzieci, które jeszcze słabo czytają). */
-function powiedzPL(tekst){
-  if (!mowa) return;
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(tekst);
-    const g = speechSynthesis.getVoices().find(v => /^pl/i.test(v.lang));
-    if (g) u.voice = g;
-    u.lang = "pl-PL"; u.rate = 0.9;
-    speechSynthesis.speak(u);
-  } catch (e) {}
-}
-if (mowa) try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch (e) {}
+const powiedz = tekst => czytaj(tekst, "en", .85);
+const powiedzPL = tekst => czytaj(tekst, "pl", 1);
+// głosy wczytują się z opóźnieniem: gdy się pojawią, odświeżamy zadanie (żeby pokazać albo ukryć głośnik)
+if (mowa) try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => { if (typeof ekran !== "undefined" && ekran === "zadanie" && R && !R.fb) render(); }; } catch (e) {}
 
 /* Krótkie, ciche dźwięki: dobrze, źle, koniec rundy, pęknięty balon. Bez plików. */
 let audio = null;
@@ -1188,7 +1191,7 @@ function zadanie(){
   } else {
     tresc = z.obrazek && !z.slowoAng
       ? `<div class="papier">${obrazek(z.obrazek)}</div>`
-      : `<div class="mega slowo-ang" lang="en">${esc(z.slowoAng)}</div>${mowa ? `<button class="glosnik" data-act="czytaj" aria-label="Posłuchaj">${ICO_GLOS}</button>` : ""}`;
+      : `<div class="mega slowo-ang" lang="en">${esc(z.slowoAng)}</div>${maGlos("en") ? `<button class="glosnik" data-act="czytaj" aria-label="Posłuchaj">${ICO_GLOS}</button>` : ""}`;
     const wyb = fb ? fb.wpis : R.wybor;
     sterowanie = `<div class="opcje">${z.opcje.map(o => `<button class="opcja${fb && o.id === z.odp ? " dobra" : ""}${fb && !fb.ok && o.id === wyb ? " zla" : ""}" data-act="wybierz-opcje" data-o="${esc(o.id)}" aria-pressed="${wyb === o.id}" aria-label="${esc(o.etykieta)}"${o.mow ? ' lang="en"' : ""}${zablokuj}>${o.html}</button>`).join("")}</div>
       ${fb && !fb.ok ? `<button class="btn btn-ikona dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="btn btn-ikona" data-act="ok" aria-label="Sprawdź" ${R.wybor === null || fb ? "disabled" : ""}>${ICO_OK}</button>`}`;
@@ -1208,7 +1211,7 @@ function zadanie(){
   <main class="screen" style="padding-top:12px">
     ${pytanieOWyjscie ? `<div class="confirm"><span class="mega">Wychodzimy?</span><div><button data-act="zostan" aria-label="Zostaję">${ICO_DALEJ}</button><button class="go" data-act="przerwij" aria-label="Wyjdź do menu">${ICO_DOM}</button></div></div>` : ""}
     <section class="card${nowe ? " pop" : ""}" style="background:${bg};color:${fg};--kolor:${bg}">
-      ${fb && !fb.ok ? info : `<button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(z.polecenie || t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(z.polecenie || t.polecenie)}</span></button>`}
+      ${fb && !fb.ok ? info : `<button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(z.polecenie || t.polecenie)}">${maGlos("pl") ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(z.polecenie || t.polecenie)}</span></button>`}
       ${tresc}
       ${fb && fb.ok ? "" : `<svg class="pegaz-chmurka" viewBox="0 0 160 70" aria-hidden="true"><path d="M14 70q-14-2-10-18q4-14 20-12q4-20 28-20q14 0 22 10q10-18 32-14q20 4 22 22q20-4 26 12q6 16-8 20z" fill="#FCF7F2"/></svg>` + pegaz({ mina: fb ? "zakr" : "skup" })}
       ${fb && fb.ok ? info : ""}
