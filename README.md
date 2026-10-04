@@ -55,6 +55,8 @@ Dodawanie i odejmowanie **do 10**, **do 20** i **do 100**. Wynik wpisuje się na
 
 - **Powitanie:** po wejściu Pegazka wlatuje i mówi „Cześć!”. Stuknięcie pomija animację.
 - **Ekran główny:** duże kafelki z rysunkami i prawie bez słów. Stuknięcie kafelka od razu zaczyna rundę.
+  Pegazka co kilka sekund robi coś zabawnego (skacze, robi fikołka, rozgląda się, tańczy,
+  zasypia, kicha brokatem, puszcza serduszka). Stuknięta też robi sztuczkę.
 - **Runda:** 10 zadań. Pasek postępu na górze, ✕ pozwala wyjść (z pytaniem, czy na pewno).
 - **Po każdej odpowiedzi** od razu widać, czy było dobrze:
   - dobrze: „Super!”, krótki dźwięk, brokat i apka sama przechodzi dalej,
