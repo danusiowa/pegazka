@@ -563,6 +563,15 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @keyframes wybuch{0%{transform:scale(0) rotate(0);opacity:0}35%{transform:scale(1.3) rotate(60deg);opacity:1}100%{transform:scale(0) rotate(140deg);opacity:0}}
 .brokat-jasny i:nth-child(odd){color:#EFD353}.brokat-jasny i:nth-child(even){color:#FFFFFF}
 .brokat-wybuch i{--r:26px}
+/* pisanie słów */
+.pis-gora{display:flex;align-items:center;gap:16px}
+.kratki{display:flex;gap:8px;flex-wrap:nowrap;font-size:clamp(34px,9vw,52px);line-height:1}
+.kratka{width:1.25em;height:1.4em;border-radius:14px;background:#FFFFFF;color:var(--ciemny);display:grid;place-items:center;box-shadow:inset 0 0 0 3px rgba(46,40,70,.18)}
+.kratka.pusta{background:rgba(255,255,255,.6)}
+.kratka.teraz{box-shadow:inset 0 0 0 4px var(--atrament)}
+.kratka.poprawna{background:#7FA055;color:#fff;box-shadow:none;animation:pop .4s ease}
+.pis-wpisane{font-size:26px;opacity:.6}
+@media (min-width:700px){ .kratki{font-size:64px;gap:10px} }
 </style>
 </head>
 <body>
@@ -626,6 +635,8 @@ const ZWIERZETA = [
 const LICZBY_ANG = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 const grupka = (klucz, n) => `<span class="grupka g${n > 6 ? "duzo" : ""}" aria-label="${n}">${Array.from({ length: n }, () => obrazek(klucz, "mini")).join("")}</span>`;
 
+/* Temat z „ukryty: true” nie pokazuje się na ekranie głównym (na razie: ą/ę/ż i dwuznaki).
+   Żeby go przywrócić, wystarczy usunąć „ukryty: true”. */
 const TEMATY = [
   {
     id: "litery", nazwa: "Polski: litery", krotko: "", typ: "litery", klawiatura: "podstawowa", maks: 1,
@@ -637,7 +648,15 @@ const TEMATY = [
       "pa[p]uga", "ka[k]tus", "dy[n]ia"])
   },
   {
-    id: "ogonki", nazwa: "Polski: ą, ę, ó, ż i inne", krotko: "", typ: "litery", klawiatura: "polska", maks: 1,
+    id: "pisanie", nazwa: "Polski: piszę słowa", krotko: "piszę", typ: "pisanie", klawiatura: "podstawowa",
+    polecenie: "Posłuchaj i napisz słowo", tlo: "#B8CAA5", napis: "#2E2846",
+    // krótkie słowa (3–5 liter) bez ą/ę/ż i bez dwuznaków; obrazek + słowo czytane na głos + kratki na literki
+    zadania: () => ["kot", "dom", "las", "sok", "ser", "lew", "lis", "pies", "auto", "sowa", "koza", "lama", "buty", "ryba", "lody",
+      "kura", "tort", "krab", "wilk", "owca", "balon", "banan", "zebra", "panda", "rower", "zegar", "arbuz", "dynia", "jajko", "motyl"]
+      .map(w => ({ klucz: w, obrazek: kluczObrazka(w), odp: w, pokaz: w, pytanie: w, slowoPL: w, czytaj: true }))
+  },
+  {
+    id: "ogonki", ukryty: true, nazwa: "Polski: ą, ę, ó, ż i inne", krotko: "", typ: "litery", klawiatura: "polska", maks: 1,
     polecenie: "Jakiej literki brakuje?", tlo: "#D2CBE3", napis: "#2E2846",
     zadania: () => literki(["[ż]aba", "[ż]yrafa", "w[ą]ż", "łab[ę]dź", "s[ł]oń", "jab[ł]ko", "pi[ł]ka", "księ[ż]yc", "s[ł]ońce", "mi[ś]",
       "[ś]limak", "wi[ś]nie", "kr[ó]lik", "wiewi[ó]rka", "t[ę]cza", "z[ą]b", "p[ą]czek", "poci[ą]g", "[ś]nieg", "ogie[ń]", "krzes[ł]o",
@@ -645,7 +664,7 @@ const TEMATY = [
       "mi[ó]d", "o[ł]ówek", "s[ł]onecznik"])
   },
   {
-    id: "dwuznaki", nazwa: "Polski: dwuznaki", krotko: "", typ: "litery", klawiatura: "polska", maks: 2,
+    id: "dwuznaki", ukryty: true, nazwa: "Polski: dwuznaki", krotko: "", typ: "litery", klawiatura: "polska", maks: 2,
     polecenie: "Jakich dwóch literek brakuje?", tlo: "#A299B8", napis: "#211C38",
     zadania: () => literki(["[ch]leb", "[ch]oinka", "[ch]mura", "mar[ch]ew", "ka[cz]ka", "babe[cz]ka", "klu[cz]", "[cz]ekolada", "[cz]ajnik",
       "[cz]ereśnie", "kur[cz]ak", "my[sz]", "gru[sz]ka", "kapelu[sz]", "p[sz]czoła", "ko[sz]ula", "ko[sz]yk", "[sz]czur", "g[rz]yb",
@@ -1052,6 +1071,7 @@ function kafelArt(t){
   const k = ["#FCF7F2", "#FFFFFF", "#F6EEDF"];
   const svg = inner => `<svg class="kart" viewBox="0 0 120 100" aria-hidden="true"><g filter="url(#brzeg)">${inner}</g></svg>`;
   if (t.id === "litery") return svg(klocki(["a", "b", "c"], k));
+  if (t.id === "pisanie") return `<svg class="kart" viewBox="0 0 120 100" aria-hidden="true"><g filter="url(#brzeg)"><g transform="translate(0 30) scale(.42)">${OBR.kot}</g><g transform="translate(36 6) scale(.72)">${klocki(["k", "o", "t"], k)}</g></g></svg>`;
   if (t.id === "ogonki") return svg(klocki(["ą", "ę", "ż"], k));
   if (t.id === "dwuznaki") return svg(klocki(["sz", "cz"], k));
   if (t.id === "mat-10") return svg(klocki(["2", "+", "3"], k));
@@ -1120,7 +1140,7 @@ function render(){
   if (ekran === "powitanie") { app.innerHTML = powitanie(); return; }
   app.innerHTML = ekran === "zadanie" ? zadanie() : ekran === "brawo" ? brawo() : start();
   if (ekran === "zadanie") dopasujSlowo();
-  if (ekran === "zadanie" && R && !R.fb && R.przeczytane !== R.i && (R.czytaj || R.lista[R.i].czytaj)) { R.przeczytane = R.i; const z = R.lista[R.i]; if (z.slowoAng) setTimeout(() => powiedz(z.slowoAng), 250); }
+  if (ekran === "zadanie" && R && !R.fb && R.przeczytane !== R.i && (R.czytaj || R.lista[R.i].czytaj)) { R.przeczytane = R.i; const z = R.lista[R.i]; if (z.slowoAng) setTimeout(() => powiedz(z.slowoAng), 250); else if (z.slowoPL) setTimeout(() => powiedzPL(z.slowoPL), 250); }
 }
 
 
@@ -1135,11 +1155,11 @@ function start(){
       ${kafelArt(t)}
       ${t.krotko ? `<span class="mega tnazwa">${esc(t.krotko)}</span>` : ""}
       <span class="graj" aria-hidden="true">${ICO_DALEJ}</span>
-      ${brokat(2, i + 2, "brokat brokat-kafel")}
     </button>`;
   };
   const grupy = [];
   TEMATY.forEach((t, i) => {
+    if (t.ukryty) return;
     const p = t.nazwa.split(": ")[0];
     let g = grupy.find(x => x.p === p); if (!g) grupy.push(g = { p, k: [] });
     g.k.push(kafel(t, i));
@@ -1180,6 +1200,18 @@ function zadanie(){
       <div class="ansrow"><span class="mega eq">=</span>${fb && !fb.ok ? `<span class="ans ans-zle" aria-label="Wpisane: ${esc(fb.wpis)}"><s>${esc(fb.wpis)}</s></span>` : ""}<span class="ans${fb && !fb.ok ? " poprawna" : ""}" aria-live="polite" aria-label="${fb && !fb.ok ? "Dobra odpowiedź" : "Twoja odpowiedź"}">${esc(fb && !fb.ok ? z.odp : fb ? fb.wpis : R.input) || "?"}</span></div>`;
     sterowanie = `<div class="pad">${[1,2,3,4,5,6,7,8,9].map(d => `<button data-act="cyfra" data-d="${d}"${zablokuj}>${d}</button>`).join("")}
       <button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button data-act="cyfra" data-d="0"${zablokuj}>0</button>${fb && !fb.ok ? `<button class="ok dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button>`}</div>`;
+  } else if (t.typ === "pisanie") {
+    const w = fb ? fb.wpis : R.input, zle = fb && !fb.ok;
+    const kratki = z.odp.split("").map((lit, k) => {
+      const pokaz = zle ? lit : (w[k] || "");
+      return `<span class="kratka${zle ? " poprawna" : pokaz ? "" : " pusta"}${!fb && k === w.length ? " teraz" : ""}">${esc(pokaz)}</span>`;
+    }).join("");
+    tresc = `<div class="pis-gora"><div class="papier">${obrazek(z.obrazek)}</div>${maGlos("pl") ? `<button class="glosnik" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${ICO_GLOS}</button>` : ""}</div>
+      ${zle ? `<div class="mega pis-wpisane" aria-label="Wpisane: ${esc(fb.wpis)}"><s>${esc(fb.wpis)}</s></div>` : ""}
+      <div class="mega kratki" aria-live="polite" aria-label="${zle ? "Dobra odpowiedź: " + esc(z.odp) : "Twoje słowo: " + esc(w)}">${kratki}</div>`;
+    const klaw = KLAWIATURY[t.klawiatura];
+    sterowanie = `<div class="klaw"><div class="abc">${klaw.map(l => `<button data-act="litera" data-l="${l}"${zablokuj}>${l}</button>`).join("")}</div>
+      <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button>${zle ? `<button class="ok dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="ok" data-act="ok" aria-label="Sprawdź"${fb || R.input.length < z.odp.length ? " disabled" : ""}>${ICO_OK}</button>`}</div></div>`;
   } else if (t.typ === "litery") {
     const [przed, po] = z.wzor.split(/\[.+?\]/);
     const w = fb ? fb.wpis : R.input;
@@ -1350,6 +1382,7 @@ function wpiszZnak(znak){
   if (!R || R.fb) return;
   const t = R.temat;
   if (t.typ === "liczby") { if (R.input.length < 3) R.input += znak; }
+  else if (t.typ === "pisanie") { if (R.input.length < R.lista[R.i].odp.length) R.input += znak; }
   else if (t.typ === "litery") { R.input = (t.maks > 1 ? R.input : "") + znak; if (R.input.length > t.maks) R.input = R.input.slice(-t.maks); }
   render();
 }
@@ -1365,6 +1398,7 @@ app.addEventListener("click", async e => {
   else if (a === "usun") { if (R && !R.fb) { R.input = R.input.slice(0, -1); render(); } }
   else if (a === "wybierz-opcje") { if (R.fb) return; R.wybor = b.dataset.o; const o = R.lista[R.i].opcje.find(x => x.id === R.wybor); if (o && o.mow) powiedz(o.mow); render(); }
   else if (a === "czytaj") { const z = R.lista[R.i]; powiedz(z.slowoAng); }
+  else if (a === "czytaj-pl") { powiedzPL(R.lista[R.i].slowoPL); }
   else if (a === "czytaj-polecenie") { powiedzPL(R.lista[R.i].polecenie || R.temat.polecenie); }
   else if (a === "ok") zatwierdz();
   else if (a === "dalej") dalej();
@@ -1379,7 +1413,7 @@ document.addEventListener("keydown", e => {
   if (R.fb) return;
   if (e.key === "Backspace" && typ !== "wybor") { R.input = R.input.slice(0, -1); render(); return; }
   if (typ === "liczby" && /^[0-9]$/.test(e.key)) wpiszZnak(e.key);
-  else if (typ === "litery" && /^\p{L}$/u.test(e.key) && KLAWIATURY.polska.includes(e.key.toLowerCase())) wpiszZnak(e.key.toLowerCase());
+  else if ((typ === "litery" || typ === "pisanie") && /^\p{L}$/u.test(e.key) && KLAWIATURY.polska.includes(e.key.toLowerCase())) wpiszZnak(e.key.toLowerCase());
   else if (typ === "wybor" && /^[1-4]$/.test(e.key)) { const o = R.lista[R.i].opcje[Number(e.key) - 1]; if (o) { R.wybor = o.id; if (o.mow) powiedz(o.mow); render(); } }
 });
 
