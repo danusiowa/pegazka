@@ -427,6 +427,12 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .klocek:nth-child(3n+1){transform:rotate(-4deg)}.klocek:nth-child(3n+2){transform:rotate(3deg)}.klocek:nth-child(3n){transform:rotate(-2deg)}
 .klocek.uzyty{opacity:0;transform:scale(.6)}
 .klocek:active{transform:scale(.94)}
+/* stopka z informacją o autorze (dla rodzica, dyskretna) */
+.stopka{margin-top:18px;padding:18px 12px 8px;text-align:center;color:var(--szary);font-size:14px;line-height:1.5;border-top:1.5px dashed var(--linia)}
+.stopka p{margin:0}
+.stopka b{color:var(--atrament)}
+.stopka a{color:var(--atrament);font-weight:700}
+.stopka-pegaz{width:56px;height:46px;display:block;margin:0 auto 4px}
 </style>
 </head>
 <body>
@@ -447,6 +453,8 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
    ===================================================================== */
 /* Nazwa apki (zwykły tekst) i imię maskotki w trzech przypadkach: kto?, kogo? (nie ma), kogo? (widzę). */
 const NAZWA = "Pegazka";
+const AUTOR = "danusiowa";                                  // podpis w stopce ekranu głównego
+const ADRES_KODU = "https://github.com/danusiowa/pegazka";
 document.title = NAZWA;
 const IMIE = { M: "Pegazka", D: "Pegazki", B: "Pegazkę" };
 const DLUGOSC_RUNDY = 10;   // krótkie rundy: małe dziecko kończy, zanim się znudzi
@@ -1072,6 +1080,11 @@ function start(){
       ${pegaz({ lv: 2 })}
     </section>
     ${grupy.map(g => `<h2 class="mega dzial">${esc(g.p)}</h2><div class="tiles">${g.k.join("")}</div>`).join("")}
+    <footer class="stopka">
+      ${pegaz({ lv: 2, mina: "szczesl", cls: "stopka-pegaz" })}
+      <p><b>${esc(NAZWA)}</b> · zrobione z sercem przez <b>${esc(AUTOR)}</b></p>
+      <p>Bez reklam, bez kont, nic nie zbiera. <a href="${ADRES_KODU}" target="_blank" rel="noopener">Kod na GitHubie</a></p>
+    </footer>
   </main>`;
 }
 
