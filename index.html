@@ -417,6 +417,16 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @media (min-width:700px){ .kratki{font-size:64px} }
 /* napisy zawsze nad brokatem */
 .hero h1,.hero .stan,.grat h1,.grat-tekst,.niesp-tytul{position:relative;z-index:2}
+/* sylaby i rozsypanka */
+.slowo .sylaba{display:inline-block}
+.slowo .kropka{opacity:.45;margin:0 .08em}
+.opcje-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opcje-3 .nazwa{font-size:clamp(30px,7vw,44px)}
+.rozsyp{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:6px 0}
+.klocek{width:clamp(64px,15vw,96px);aspect-ratio:1;border-radius:20px;background:#FFFFFF;box-shadow:inset 0 0 0 2px var(--linia),0 4px 0 rgba(46,40,70,.12);font-family:var(--mega);font-weight:800;font-size:clamp(34px,8vw,52px);color:var(--ciemny);transition:transform .12s,opacity .12s}
+.klocek:nth-child(3n+1){transform:rotate(-4deg)}.klocek:nth-child(3n+2){transform:rotate(3deg)}.klocek:nth-child(3n){transform:rotate(-2deg)}
+.klocek.uzyty{opacity:0;transform:scale(.6)}
+.klocek:active{transform:scale(.94)}
 </style>
 </head>
 <body>
@@ -491,6 +501,40 @@ const TEMATY = [
       "ra[k]ieta", "ar[b]uz", "a[n]anas", "cy[t]ryna", "gi[t]ara", "tele[f]on", "mo[t]yl", "kro[w]a", "ow[c]a", "del[f]in", "pin[g]win",
       "pi[e]s", "ce[b]ula", "pre[z]ent", "po[m]idor", "li[s]", "za[m]ek", "tru[s]kawka", "ja[j]ko", "kr[a]b", "rek[i]n", "kro[k]odyl",
       "pa[p]uga", "ka[k]tus", "dy[n]ia"])
+  },
+  {
+    id: "sylaby", nazwa: "Polski: sylaby", krotko: "sylaby", typ: "sylaby",
+    polecenie: "Jakiej sylaby brakuje?", tlo: "#C4B28E", napis: "#2E2846",
+    // słowo podzielone na sylaby („-”), jedna sylaba pusta; dziecko wybiera ją z trzech klocków
+    zadania: () => ["ko-za", "so-wa", "la-ma", "ry-ba", "lo-dy", "ku-ra", "au-to", "bu-ty", "ba-lon", "ba-nan", "ze-bra", "pan-da",
+      "ro-wer", "ze-gar", "ar-buz", "dy-nia", "jaj-ko", "mo-tyl", "kro-wa", "ow-ca", "ce-bu-la", "po-mi-dor", "pa-ra-sol", "ra-kie-ta",
+      "gi-ta-ra", "te-le-fon", "pin-gwin", "del-fin", "kak-tus", "pre-zent", "za-mek", "a-na-nas", "cy-try-na", "pa-pu-ga", "ty-grys", "re-kin"]
+      .flatMap(w => {
+        const syl = w.split("-"), slowo = syl.join("");
+        // w słowach z dwiema sylabami zgadujemy każdą z nich, w dłuższych jedną (stałą), żeby pula nie była za duża
+        const luki = syl.length === 2 ? [0, 1] : [(slowo.length * 7) % syl.length];
+        return luki.map(k => ({ klucz: slowo + "-" + k, sylaby: syl, luka: k, odp: syl[k], obrazek: kluczObrazka(slowo), pokaz: syl.join("-"), pytanie: slowo, slowoPL: slowo, czytaj: true, grupa: slowo }));
+      }),
+    opcje(z){
+      const wszystkie = [...new Set(pula(this).flatMap(x => x.sylaby))].filter(x => x !== z.odp);
+      const podobne = shuffle(wszystkie.filter(x => Math.abs(x.length - z.odp.length) <= 1 && x[0] !== z.odp[0]));
+      const inne = (podobne.length >= 2 ? podobne : shuffle(wszystkie)).slice(0, 2);
+      return shuffle([z.odp, ...inne]).map(x => ({ id: x, etykieta: x, html: `<span class="nazwa">${esc(x)}</span>` }));
+    }
+  },
+  {
+    id: "rozsypanka", nazwa: "Polski: rozsypanka", krotko: "rozsypanka", typ: "rozsypanka",
+    polecenie: "Ułóż słowo z literek", tlo: "#F2CFC9", napis: "#2E2846",
+    zadania: () => ["kot", "dom", "las", "sok", "ser", "lew", "lis", "pies", "auto", "sowa", "koza", "lama", "buty", "ryba", "lody",
+      "kura", "tort", "krab", "wilk", "owca", "balon", "banan", "zebra", "panda", "rower", "zegar", "arbuz", "dynia", "jajko", "motyl"]
+      .map(w => ({ klucz: w, obrazek: kluczObrazka(w), odp: w, pokaz: w, pytanie: w, slowoPL: w, czytaj: true })),
+    opcje(z){
+      // pomieszane literki, nigdy w dobrej kolejności
+      let lit = z.odp.split("");
+      for (let p = 0; p < 10 && lit.join("") === z.odp; p++) lit = shuffle(lit);
+      if (lit.join("") === z.odp) lit = lit.slice(1).concat(lit[0]);
+      return lit.map((l, i) => ({ id: String(i), lit: l }));
+    }
   },
   {
     id: "pisanie", nazwa: "Polski: piszę słowa", krotko: "piszę", typ: "pisanie", klawiatura: "podstawowa",
@@ -923,6 +967,8 @@ function kafelArt(t){
   const k = ["#FCF7F2", "#FFFFFF", "#F6EEDF"];
   const svg = inner => `<svg class="kart" viewBox="0 0 120 100" aria-hidden="true"><g filter="url(#brzeg)">${inner}</g></svg>`;
   if (t.id === "litery") return svg(klocki(["a", "b", "c"], k));
+  if (t.id === "sylaby") return svg(klocki(["ba", "lon"], k));
+  if (t.id === "rozsypanka") return svg([["t", 14, 44, -12], ["o", 44, 22, 9], ["k", 74, 48, -6]].map(([l, x, y, r], i) => `<g transform="rotate(${r} ${x + 17} ${y + 20})"><rect x="${x}" y="${y}" width="34" height="40" rx="9" fill="${k[i]}"/><text x="${x + 17}" y="${y + 29}" text-anchor="middle" font-family="Playpen Sans, sans-serif" font-weight="800" font-size="28" fill="#2E2846">${l}</text></g>`).join(""));
   if (t.id === "pisanie") return `<svg class="kart" viewBox="0 0 120 100" aria-hidden="true"><g filter="url(#brzeg)"><g transform="translate(0 30) scale(.42)">${OBR.kot}</g><g transform="translate(36 6) scale(.72)">${klocki(["k", "o", "t"], k)}</g></g></svg>`;
   if (t.id === "ogonki") return svg(klocki(["ą", "ę", "ż"], k));
   if (t.id === "dwuznaki") return svg(klocki(["sz", "cz"], k));
@@ -1032,7 +1078,7 @@ function start(){
 function zacznijRunde(tematId){
   const t = tematById(tematId); if (!t) return;
   const lista = wybierzZadania(t, dlugoscRundy(t)).map(z => t.opcje ? { ...z, opcje: t.opcje(z) } : z);
-  R = { temat: t, rodzaj: "runda", lista, i: 0, input: "", wybor: null, odpowiedzi: [], start: Date.now(), tZad: Date.now(), czytaj: !!t.czytaj, przeczytane: -1, fb: null };
+  R = { temat: t, rodzaj: "runda", lista, i: 0, input: "", uzyte: [], wybor: null, odpowiedzi: [], start: Date.now(), tZad: Date.now(), czytaj: !!t.czytaj, przeczytane: -1, fb: null };
   pytanieOWyjscie = false; ekran = "zadanie"; render(); window.scrollTo({ top: 0 });
 }
 
@@ -1046,8 +1092,30 @@ function zadanie(){
   const dots = R.lista.map((_, k) => `<i class="${k < R.i ? (R.odpowiedzi[k].dobrze ? "done" : "zle") : k === R.i ? "now" : ""}"></i>`).join("");
   const [bg, fg] = kolorTematu(t, TEMATY.indexOf(t));
   let tresc = "", sterowanie = "";
+  R.uzyte = R.uzyte || [];
   const zablokuj = fb ? " disabled" : "";
-  if (t.typ === "liczby") {
+  const kratkiHtml = (w, zle) => z.odp.split("").map((lit, k) => {
+      const pokaz = zle ? lit : (w[k] || "");
+      return `<span class="kratka${zle ? " poprawna" : pokaz ? "" : " pusta"}${!fb && k === w.length ? " teraz" : ""}">${esc(pokaz)}</span>`;
+    }).join("");
+  const gora = () => `<div class="pis-gora"><div class="papier">${obrazek(z.obrazek)}</div>${maGlos("pl") ? `<button class="glosnik" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${ICO_GLOS}</button>` : ""}</div>`;
+  const okLubDalej = (gotowe, cls = "ok") => fb && !fb.ok ? `<button class="${cls} dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="${cls}" data-act="ok" aria-label="Sprawdź"${fb || !gotowe ? " disabled" : ""}>${ICO_OK}</button>`;
+  if (t.typ === "rozsypanka") {
+    const w = fb ? fb.wpis : R.input, zle = fb && !fb.ok;
+    tresc = `${gora()}
+      ${zle ? `<div class="mega pis-wpisane" aria-label="Ułożone: ${esc(fb.wpis)}"><s>${esc(fb.wpis)}</s></div>` : ""}
+      <div class="mega kratki" aria-live="polite" aria-label="${zle ? "Dobra odpowiedź: " + esc(z.odp) : "Twoje słowo: " + esc(w)}">${kratkiHtml(w, zle)}</div>`;
+    sterowanie = `<div class="klaw"><div class="rozsyp">${z.opcje.map(o => `<button class="klocek${R.uzyte.includes(o.id) ? " uzyty" : ""}" data-act="klocek" data-i="${o.id}" aria-label="Literka ${esc(o.lit)}"${zablokuj || (R.uzyte.includes(o.id) ? " disabled" : "")}>${esc(o.lit)}</button>`).join("")}</div>
+      <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Oddaj ostatnią literkę"${zablokuj}>${ICO_USUN}</button>${okLubDalej(R.input.length === z.odp.length)}</div></div>`;
+  } else if (t.typ === "sylaby") {
+    const zle = fb && !fb.ok, wyb = fb ? fb.wpis : R.wybor;
+    const sylaby = z.sylaby.map((x, k) => k !== z.luka ? `<span class="sylaba">${esc(x)}</span>`
+      : zle ? `<span class="luka poprawna" aria-label="Dobra sylaba: ${esc(x)}">${esc(x)}</span>`
+      : `<span class="luka${wyb ? "" : " pusta"}" aria-live="polite">${esc(wyb || "?")}</span>`).join(`<span class="kropka" aria-hidden="true">·</span>`);
+    tresc = `${gora()}<div class="mega slowo" aria-label="Słowo podzielone na sylaby">${sylaby}</div>`;
+    sterowanie = `<div class="opcje opcje-3">${z.opcje.map(o => `<button class="opcja${fb && o.id === z.odp ? " dobra" : ""}${zle && o.id === wyb ? " zla" : ""}" data-act="wybierz-opcje" data-o="${esc(o.id)}" aria-pressed="${wyb === o.id}" aria-label="Sylaba ${esc(o.etykieta)}"${zablokuj}>${o.html}</button>`).join("")}</div>
+      ${okLubDalej(R.wybor !== null, "btn btn-ikona")}`;
+  } else if (t.typ === "liczby") {
     tresc = `<div class="mega q">${esc(z.pytanie)}</div>
       <div class="ansrow"><span class="mega eq">=</span>${fb && !fb.ok ? `<span class="ans ans-zle" aria-label="Wpisane: ${esc(fb.wpis)}"><s>${esc(fb.wpis)}</s></span>` : ""}<span class="ans${fb && !fb.ok ? " poprawna" : ""}" aria-live="polite" aria-label="${fb && !fb.ok ? "Dobra odpowiedź" : "Twoja odpowiedź"}">${esc(fb && !fb.ok ? z.odp : fb ? fb.wpis : R.input) || "?"}</span></div>`;
     sterowanie = `<div class="pad">${[1,2,3,4,5,6,7,8,9].map(d => `<button data-act="cyfra" data-d="${d}"${zablokuj}>${d}</button>`).join("")}
@@ -1131,12 +1199,12 @@ function zatwierdz(){
   if (!R || R.fb) return;
   const t = R.temat, z = R.lista[R.i];
   let wpis, ok, pokazWpis, dobrzeHtml;
-  if (t.typ === "wybor") {
+  if (t.typ === "wybor" || t.typ === "sylaby") {
     if (R.wybor === null) return;
     wpis = R.wybor; ok = wpis === z.odp;
     pokazWpis = (z.opcje.find(o => o.id === wpis) || {}).etykieta || wpis;
     const dobra = z.opcje.find(o => o.id === z.odp);
-    dobrzeHtml = t.id === "ang-kolory" ? `<span class="mini-plama">${dobra.html}</span>` : t.id === "ang-liczby" ? `<b class="mega duza">${z.odp}</b>` : `<b class="mega duza" lang="en">${esc(z.odp)}</b>`;
+    dobrzeHtml = !dobra ? "" : t.id === "ang-kolory" ? `<span class="mini-plama">${dobra.html}</span>` : t.id === "ang-liczby" ? `<b class="mega duza">${z.odp}</b>` : `<b class="mega duza" lang="en">${esc(z.odp)}</b>`;
   } else {
     wpis = R.input.trim(); if (!wpis) return;
     const dobre = z.odp.split("/").map(norm).filter(Boolean);
@@ -1147,7 +1215,7 @@ function zatwierdz(){
       : `<b class="mega duza">${esc(z.pytanie)} = ${esc(z.odp)}</b>`;
   }
   const teraz = Date.now();
-  R.odpowiedzi.push({ klucz: z.klucz, pytanie: z.pytanie, odp: z.odp, pokaz: z.pokaz || (z.pytanie + " = " + z.odp), wpis, wpisPokaz: pokazWpis, wybor: t.typ === "wybor", dobrze: ok, ms: teraz - R.tZad });
+  R.odpowiedzi.push({ klucz: z.klucz, pytanie: z.pytanie, odp: z.odp, pokaz: z.pokaz || (z.pytanie + " = " + z.odp), wpis, wpisPokaz: pokazWpis, wybor: t.typ === "wybor" || t.typ === "sylaby", dobrze: ok, ms: teraz - R.tZad });
   R.fb = { ok, wpis, tekst: ok ? BRAWO_KROTKO[Math.floor(Math.random() * BRAWO_KROTKO.length)] : PRAWIE_KROTKO[Math.floor(Math.random() * PRAWIE_KROTKO.length)], dobrzeHtml };
   render();
   clearTimeout(autoDalej);
@@ -1157,7 +1225,7 @@ function zatwierdz(){
 function dalej(){
   clearTimeout(autoDalej);
   if (!R || !R.fb) return;
-  R.fb = null; R.input = ""; R.wybor = null; R.i++; R.tZad = Date.now();
+  R.fb = null; R.input = ""; R.uzyte = []; R.wybor = null; R.i++; R.tZad = Date.now();
   if (R.i >= R.lista.length) return zakonczRunde();
   render();
 }
@@ -1249,7 +1317,8 @@ app.addEventListener("click", async e => {
   else if (a === "runda") zacznijRunde(b.dataset.t);
   else if (a === "cyfra") wpiszZnak(b.dataset.d);
   else if (a === "litera") wpiszZnak(b.dataset.l);
-  else if (a === "usun") { if (R && !R.fb) { R.input = R.input.slice(0, -1); render(); } }
+  else if (a === "usun") { if (R && !R.fb) { R.input = R.input.slice(0, -1); if (R.uzyte) R.uzyte.pop(); render(); } }
+  else if (a === "klocek") { if (R && !R.fb) { const z = R.lista[R.i], o = z.opcje.find(x => x.id === b.dataset.i); if (o && !R.uzyte.includes(o.id) && R.input.length < z.odp.length) { R.uzyte.push(o.id); R.input += o.lit; render(); } } }
   else if (a === "wybierz-opcje") { if (R.fb) return; R.wybor = b.dataset.o; const o = R.lista[R.i].opcje.find(x => x.id === R.wybor); if (o && o.mow) powiedz(o.mow); render(); }
   else if (a === "czytaj") { const z = R.lista[R.i]; powiedz(z.slowoAng); }
   else if (a === "czytaj-pl") { powiedzPL(R.lista[R.i].slowoPL); }
@@ -1265,10 +1334,10 @@ document.addEventListener("keydown", e => {
   const typ = R.temat.typ;
   if (e.key === "Enter") { e.preventDefault(); R.fb ? dalej() : zatwierdz(); return; }
   if (R.fb) return;
-  if (e.key === "Backspace" && typ !== "wybor") { R.input = R.input.slice(0, -1); render(); return; }
+  if (e.key === "Backspace" && typ !== "wybor" && typ !== "sylaby") { R.input = R.input.slice(0, -1); if (R.uzyte) R.uzyte.pop(); render(); return; }
   if (typ === "liczby" && /^[0-9]$/.test(e.key)) wpiszZnak(e.key);
   else if ((typ === "litery" || typ === "pisanie") && /^\p{L}$/u.test(e.key) && KLAWIATURY.polska.includes(e.key.toLowerCase())) wpiszZnak(e.key.toLowerCase());
-  else if (typ === "wybor" && /^[1-4]$/.test(e.key)) { const o = R.lista[R.i].opcje[Number(e.key) - 1]; if (o) { R.wybor = o.id; if (o.mow) powiedz(o.mow); render(); } }
+  else if ((typ === "wybor" || typ === "sylaby") && /^[1-4]$/.test(e.key)) { const o = R.lista[R.i].opcje[Number(e.key) - 1]; if (o) { R.wybor = o.id; if (o.mow) powiedz(o.mow); render(); } }
 });
 
 document.getElementById("defs-globalne").innerHTML = FILTR_BRZEG;
