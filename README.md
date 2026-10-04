@@ -6,6 +6,28 @@ polski, matematykę i angielski.
 
 **Apka:** https://danusiowa.github.io/pegazka/
 
+## Jak wygląda
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/makiety/01-start.png" width="260" alt="Ekran główny"><br><b>Ekran główny</b></td>
+    <td align="center"><img src="docs/makiety/02-litery.png" width="260" alt="Brakująca literka"><br><b>Litery</b></td>
+    <td align="center"><img src="docs/makiety/03-sylaby.png" width="260" alt="Brakująca sylaba"><br><b>Sylaby</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/makiety/04-rozsypanka.png" width="260" alt="Rozsypanka"><br><b>Rozsypanka</b></td>
+    <td align="center"><img src="docs/makiety/06-angielski.png" width="260" alt="Angielski: zwierzęta"><br><b>Angielski: zwierzęta</b></td>
+    <td align="center"><img src="docs/makiety/09-niespodzianka.png" width="260" alt="Niespodzianka po rundzie"><br><b>Niespodzianka po rundzie</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/makiety/07-dobrze.png" width="260" alt="Dobra odpowiedź"><br><b>Dobra odpowiedź</b></td>
+    <td align="center"><img src="docs/makiety/08-blad.png" width="260" alt="Błąd: dobra odpowiedź na zielono"><br><b>Błąd: dobra odpowiedź na zielono</b></td>
+    <td></td>
+  </tr>
+</table>
+
+<p align="center"><img src="docs/makiety/05-matematyka.png" width="560" alt="Matematyka na tablecie w poziomie"><br><b>Matematyka (tablet w poziomie)</b></p>
+
 ## Co jest w środku
 
 ### Polski
