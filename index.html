@@ -70,7 +70,7 @@ svg.jabl{width:18px;height:18px;flex:none}
   100%{transform:translate(0,0) scale(.2);opacity:0}
 }
 @keyframes usta{0%,64%{opacity:0;transform:scale(.3)}66%{opacity:1;transform:scale(1)}70%{opacity:1;transform:scale(1)}72%,100%{opacity:0;transform:scale(.3)}}
-@keyframes heroPegaz{0%,100%{transform:none}12%{transform:scale(1.02,.98)}24%{transform:none}36%{transform:scale(1.02,.98)}48%{transform:none}60%{transform:scale(1.05,.94)}66%{transform:translateY(-14px) scale(.98,1.03)}72%{transform:scale(1.04,.96)}78%{transform:translateY(-4px)}84%{transform:none}}
+@keyframes heroPegaz{0%,100%{transform:none}20%{transform:scale(1.02,.98)}40%{transform:none}60%{transform:scale(1.04,.95)}68%{transform:translateY(-12px) scale(.98,1.03)}76%{transform:scale(1.03,.97)}84%{transform:none}}
 @keyframes cienPegaza{0%,100%{transform:none;opacity:1}60%{transform:scaleX(1.08)}66%{transform:scale(.6);opacity:.45}72%{transform:scaleX(1.1);opacity:1}78%{transform:scale(.85)}84%{transform:none}}
 @keyframes skrzydlo{0%,58%,80%,100%{transform:none}62%{transform:rotate(-14deg)}66%{transform:rotate(4deg)}70%{transform:rotate(-12deg)}74%{transform:rotate(2deg)}}
 @keyframes ogon{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}
@@ -537,6 +537,30 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .opcja.dobra:has(.obr-opcja){background:#E2EFD7}
 .opcja.zla:has(.obr-opcja){background:#FFE7D6}
 @media (min-width:700px){ .opcja .obr-opcja{width:140px} }
+/* brokat */
+.brokat{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;border-radius:inherit}
+.brokat i{position:absolute;width:var(--r);height:var(--r);opacity:1;filter:drop-shadow(0 0 3px rgba(255,255,255,.9))}
+.brokat i svg{width:100%;height:100%;display:block}
+.top{position:relative;overflow:hidden}
+.top .logo,.top .mega{position:relative;z-index:1}
+.top .brokat{left:40%}
+.hero h1,.hero .stan,.hero .pegaz{position:relative;z-index:1}
+.hero .pegaz{position:absolute}
+.tile .brokat-kafel{z-index:1}
+.tile .brokat-kafel i{--r:20px}
+.grat h1,.grat-tekst{position:relative;z-index:1}
+.brokat-wybuch{z-index:0}
+.fb .fb-pegaz,.fb-tekst{position:relative;z-index:1}
+.brokat-pw{z-index:0}
+@media (prefers-reduced-motion:no-preference){
+  .brokat i{animation:migocz 2.4s ease-in-out infinite;transform:scale(0)}
+  .brokat-kafel i{animation-duration:3.6s}
+  .brokat-wybuch i{animation:wybuch .9s ease-out both}
+}
+@keyframes migocz{0%,100%{transform:scale(.45) rotate(0);opacity:.55}35%,55%{transform:scale(1.1) rotate(45deg);opacity:1}}
+@keyframes wybuch{0%{transform:scale(0) rotate(0);opacity:0}35%{transform:scale(1.3) rotate(60deg);opacity:1}100%{transform:scale(0) rotate(140deg);opacity:0}}
+.brokat-jasny i:nth-child(odd){color:#EFD353}.brokat-jasny i:nth-child(even){color:#FFFFFF}
+.brokat-wybuch i{--r:26px}
 </style>
 </head>
 <body>
@@ -993,6 +1017,17 @@ function wylosujNiespodzianke(){
 }
 const progRundyOk = r => r.dobre >= progRundy(r.wszystkie);
 
+/* ===================== brokat ===================== */
+/* Małe migoczące iskierki. Pozycje stałe (bez losowania), żeby nie skakały przy każdym odświeżeniu ekranu. */
+const KOLORY_BROKATU = ["#E9C232", "#E07AA8", "#5FAFA6", "#EFD353", "#9D86C9", "#EA994D"];
+const ISKRA = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0c1 6 4 9 10 10c-6 1-9 4-10 10c-1-6-4-9-10-10c6-1 9-4 10-10z" fill="currentColor"/></svg>';
+function brokat(n, ziarno = 1, klasa = "brokat"){
+  return `<span class="${klasa}" aria-hidden="true">${Array.from({ length: n }, (_, i) => {
+    const k = (i + 1) * 37 * ziarno;
+    return `<i style="left:${(k * 7) % 94}%;top:${(k * 13) % 88}%;--r:${14 + (k % 4) * 6}px;animation-delay:${(klasa.includes("wybuch") ? i * .025 : (k % 17) * .19).toFixed(2)}s;color:${KOLORY_BROKATU[(i + ziarno) % KOLORY_BROKATU.length]}">${ISKRA}</i>`;
+  }).join("")}</span>`;
+}
+
 /* ===================== ikony (nawigacja na symbolach) ===================== */
 const IK = (d, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}${extra}</svg>`;
 const ICO_DOM = IK('<path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>');
@@ -1071,7 +1106,7 @@ const app = document.getElementById("app");
 function powitanie(){
   const gwiazdki = Array.from({ length: 9 }, (_, i) => `<i style="left:${8 + (i * 37) % 84}%;top:${10 + (i * 23) % 60}%;animation-delay:${(.3 + i * .12).toFixed(2)}s;background:${["#EFD353", "#DEA2A6", "#B4D8D4"][i % 3]}"></i>`).join("");
   return `<button class="powitanie" data-act="dalej-powitanie" aria-label="Zaczynamy">
-    <span class="pw-gwiazdki" aria-hidden="true">${gwiazdki}</span>
+    <span class="pw-gwiazdki" aria-hidden="true">${gwiazdki}</span>${brokat(16, 2, "brokat brokat-pw")}
     <span class="pw-lot">${pegaz({ lv: 2, mina: "szczesl", cls: "pegaz pw-pegaz" })}</span>
     <span class="pw-dymek mega">Cześć!</span>
     <span class="pw-nazwa mega">${esc(NAZWA)}</span>
@@ -1087,7 +1122,7 @@ function render(){
 
 
 function naglowek(){
-  return `<div class="top"><span class="logo">${pegaz({ lv: 1, cls: "" })}</span><span class="mega">${esc(NAZWA)}</span></div>`;
+  return `<div class="top"><span class="logo">${pegaz({ lv: 1, cls: "" })}</span><span class="mega">${esc(NAZWA)}</span>${brokat(5, 3, "brokat brokat-jasny")}</div>`;
 }
 
 function start(){
@@ -1097,6 +1132,7 @@ function start(){
       ${kafelArt(t)}
       ${t.krotko ? `<span class="mega tnazwa">${esc(t.krotko)}</span>` : ""}
       <span class="graj" aria-hidden="true">${ICO_DALEJ}</span>
+      ${brokat(2, i + 2, "brokat brokat-kafel")}
     </button>`;
   };
   const grupy = [];
@@ -1108,12 +1144,11 @@ function start(){
   return `${naglowek()}
   <main class="screen">
     <section class="hero">
+      ${brokat(14, 1)}
       <h1 class="mega">Czego dziś się uczymy?</h1>
       <p class="stan">Stuknij zabawę i zaczynamy!</p>
       <span class="cien" aria-hidden="true"></span>
       ${pegaz({ lv: 2 })}
-      <span class="h-usta" aria-hidden="true"></span>
-      ${JABLKO("h-jablko")}
     </section>
     ${grupy.map(g => `<h2 class="mega dzial">${esc(g.p)}</h2><div class="tiles">${g.k.join("")}</div>`).join("")}
   </main>`;
@@ -1159,7 +1194,7 @@ function zadanie(){
       ${fb && !fb.ok ? `<button class="btn btn-ikona dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="btn btn-ikona" data-act="ok" aria-label="Sprawdź" ${R.wybor === null || fb ? "disabled" : ""}>${ICO_OK}</button>`}`;
   }
   // informacja zwrotna od razu po odpowiedzi
-  const info = fb && !fb.ok ? `<div class="fb-pasek" role="status"><span class="fb-znak" aria-hidden="true">${ICO_X}</span><b class="mega">${esc(fb.tekst)}</b><span class="fb-pasek-t">Tak jest dobrze:</span></div>` : fb ? `<div class="fb ${fb.ok ? "fb-ok" : "fb-nie"}" role="status">
+  const info = fb && !fb.ok ? `<div class="fb-pasek" role="status"><span class="fb-znak" aria-hidden="true">${ICO_X}</span><b class="mega">${esc(fb.tekst)}</b><span class="fb-pasek-t">Tak jest dobrze:</span></div>` : fb ? `<div class="fb ${fb.ok ? "fb-ok" : "fb-nie"}" role="status">${fb.ok ? brokat(14, R.i + 1, "brokat brokat-wybuch") : ""}
       ${pegaz({ mina: fb.ok ? "aha" : "zakr", cls: "pegaz fb-pegaz" })}
       <div class="fb-tekst"><span class="fb-znak" aria-hidden="true">${fb.ok ? ICO_OK : ICO_X}</span><b class="mega">${esc(fb.tekst)}</b>
       ${fb.ok ? "" : `<span class="fb-dobrze">${fb.dobrzeHtml}</span>`}</div>
@@ -1291,6 +1326,7 @@ function brawo(){
   return `
   <main class="screen brawo-ekran">
     <section class="grat ${ok ? "grat-ok" : "grat-nie"} pop">
+      ${brokat(12, 5)}
       <h1 class="mega">${ok ? (r.dobre === r.wszystkie ? "Wszystko dobrze!" : "Brawo!") : "Dobra robota!"}</h1>
       <p class="grat-tekst">${esc(r.tekst)}</p>
     </section>
