@@ -532,6 +532,11 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ans-zle{min-width:0;background:transparent;box-shadow:none;color:inherit;opacity:.55;font-size:28px;padding:0 4px}
 .pad button.dalej,.abc-akcje .dalej,.btn.dalej{background:var(--atrament);color:#fff;opacity:1}
 @media (min-width:700px){ .fb-pasek b{font-size:28px} .fb-pasek-t{font-size:18px} }
+.opcja .obr-opcja{width:min(120px,80%);height:auto;aspect-ratio:1}
+.opcja:has(.obr-opcja){background:#EEF4F2}
+.opcja.dobra:has(.obr-opcja){background:#E2EFD7}
+.opcja.zla:has(.obr-opcja){background:#FFE7D6}
+@media (min-width:700px){ .opcja .obr-opcja{width:140px} }
 </style>
 </head>
 <body>
@@ -652,12 +657,20 @@ const TEMATY = [
     }
   },
   {
-    id: "ang-zwierzeta", nazwa: "Angielski: zwierzęta", krotko: "zwierzęta", typ: "wybor", obrazkiem: true,
+    id: "ang-zwierzeta", nazwa: "Angielski: zwierzęta", krotko: "zwierzęta", typ: "wybor",
     polecenie: "Jak to jest po angielsku?", tlo: "#80A4AA", napis: "#14292C",
-    zadania: () => ZWIERZETA.map(([o, en]) => ({ klucz: en, pytanie: en, obrazek: o, odp: en, pokaz: en })),
+    // w dwie strony: obrazek → wybierz napis (z dźwiękiem) albo napis z dźwiękiem → wybierz obrazek;
+    // to samo zwierzę (ta sama „grupa”) nie trafi do jednej rundy w obu kierunkach
+    zadania: () => ZWIERZETA.flatMap(([o, en]) => [
+      { klucz: en, pytanie: en, obrazek: o, odp: en, pokaz: en, grupa: en },
+      { klucz: en + "-slowo", pytanie: en, slowoAng: en, odp: en, pokaz: en, grupa: en, czytaj: true, polecenie: "Posłuchaj i wybierz zwierzątko" }
+    ]),
     opcje(z){
       const inne = shuffle(ZWIERZETA.filter(x => x[1] !== z.odp)).slice(0, 3);
-      return shuffle([ZWIERZETA.find(x => x[1] === z.odp), ...inne]).map(([o, en]) => ({ id: en, etykieta: en, mow: en, html: `<span class="nazwa">${en}${ICO_GLOS}</span>` }));
+      const cztery = shuffle([ZWIERZETA.find(x => x[1] === z.odp), ...inne]);
+      return z.slowoAng
+        ? cztery.map(([o, en]) => ({ id: en, etykieta: en, html: obrazek(o, "obr-opcja") }))
+        : cztery.map(([o, en]) => ({ id: en, etykieta: en, mow: en, html: `<span class="nazwa">${en}${ICO_GLOS}</span>` }));
     }
   }
 ];
@@ -1069,7 +1082,7 @@ function render(){
   if (ekran === "powitanie") { app.innerHTML = powitanie(); return; }
   app.innerHTML = ekran === "zadanie" ? zadanie() : ekran === "brawo" ? brawo() : start();
   if (ekran === "zadanie") dopasujSlowo();
-  if (ekran === "zadanie" && R && !R.fb && R.czytaj && R.przeczytane !== R.i) { R.przeczytane = R.i; const z = R.lista[R.i]; if (z.slowoAng) setTimeout(() => powiedz(z.slowoAng), 250); }
+  if (ekran === "zadanie" && R && !R.fb && R.przeczytane !== R.i && (R.czytaj || R.lista[R.i].czytaj)) { R.przeczytane = R.i; const z = R.lista[R.i]; if (z.slowoAng) setTimeout(() => powiedz(z.slowoAng), 250); }
 }
 
 
@@ -1138,7 +1151,7 @@ function zadanie(){
     sterowanie = `<div class="klaw"><div class="abc${t.klawiatura === "polska" ? " pl" : ""}">${klaw.map(l => `<button class="${SPECJALNE.includes(l) ? "spec" : ""}" data-act="litera" data-l="${l}"${zablokuj}>${l}</button>`).join("")}</div>
       <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button>${fb && !fb.ok ? `<button class="ok dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button>`}</div></div>`;
   } else {
-    tresc = t.obrazkiem
+    tresc = z.obrazek && !z.slowoAng
       ? `<div class="papier">${obrazek(z.obrazek)}</div>`
       : `<div class="mega slowo-ang" lang="en">${esc(z.slowoAng)}</div>${mowa ? `<button class="glosnik" data-act="czytaj" aria-label="Posłuchaj">${ICO_GLOS}</button>` : ""}`;
     const wyb = fb ? fb.wpis : R.wybor;
@@ -1160,7 +1173,7 @@ function zadanie(){
   <main class="screen" style="padding-top:12px">
     ${pytanieOWyjscie ? `<div class="confirm"><span class="mega">Wychodzimy?</span><div><button data-act="zostan" aria-label="Zostaję">${ICO_DALEJ}</button><button class="go" data-act="przerwij" aria-label="Wyjdź do menu">${ICO_DOM}</button></div></div>` : ""}
     <section class="card${nowe ? " pop" : ""}" style="background:${bg};color:${fg};--kolor:${bg}">
-      <button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(t.polecenie)}</span></button>
+      <button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(z.polecenie || t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(z.polecenie || t.polecenie)}</span></button>
       ${tresc}
       ${fb && fb.ok ? "" : `<svg class="pegaz-chmurka" viewBox="0 0 160 70" aria-hidden="true"><path d="M14 70q-14-2-10-18q4-14 20-12q4-20 28-20q14 0 22 10q10-18 32-14q20 4 22 22q20-4 26 12q6 16-8 20z" fill="#FCF7F2"/></svg>` + pegaz({ mina: fb ? "zakr" : "skup" })}
       ${info}
@@ -1313,7 +1326,7 @@ app.addEventListener("click", async e => {
   else if (a === "usun") { if (R && !R.fb) { R.input = R.input.slice(0, -1); render(); } }
   else if (a === "wybierz-opcje") { if (R.fb) return; R.wybor = b.dataset.o; const o = R.lista[R.i].opcje.find(x => x.id === R.wybor); if (o && o.mow) powiedz(o.mow); render(); }
   else if (a === "czytaj") { const z = R.lista[R.i]; powiedz(z.slowoAng); }
-  else if (a === "czytaj-polecenie") { powiedzPL(R.temat.polecenie); }
+  else if (a === "czytaj-polecenie") { powiedzPL(R.lista[R.i].polecenie || R.temat.polecenie); }
   else if (a === "ok") zatwierdz();
   else if (a === "dalej") dalej();
   else if (a === "wyjdz") { pytanieOWyjscie = true; render(); }
