@@ -59,8 +59,13 @@ Dodawanie i odejmowanie **do 10**, **do 20** i **do 100**. Wynik wpisuje się na
 - **Po każdej odpowiedzi** od razu widać, czy było dobrze:
   - dobrze: „Super!”, krótki dźwięk, brokat i apka sama przechodzi dalej,
   - źle: dobra odpowiedź pojawia się na zielono w swoim miejscu, a ▶ prowadzi dalej.
-- **Po rundzie:** pochwała i losowa niespodzianka (balony do przebijania, bańki do łapania,
-  lot po tęczy, deszcz gwiazdek albo taniec). Niespodzianki się nie zbierają.
+- **Po rundzie:** pochwała i jedna z 15 losowych niespodzianek. Pięć ostatnich się nie powtarza.
+  - do stukania: balony, bańki, serduszka, gwiazdki do zapalenia na nocnym niebie,
+    kamyki zamieniające się w kwiatki i prezenty do otwarcia,
+  - do oglądania: lot po tęczy, deszcz gwiazdek, taniec, bal w zamku z fajerwerkami,
+    magiczna łąka, skoki po chmurkach, fikołek, korona dla Pegazki i brokatowa burza.
+
+  Niespodzianki się nie zbierają.
 - **Bez wyników i rankingów:** nie ma punktów, czasu, procentów, kalendarza ani kont.
 
 ### Losowanie zadań
