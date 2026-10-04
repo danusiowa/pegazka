@@ -522,6 +522,16 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   #app[data-ekran="zadanie"] .card .q{font-size:clamp(64px,12vh,110px)}
   #app[data-ekran="zadanie"] .slowo{font-size:clamp(60px,10vh,92px)}
 }
+/* błąd: dobra odpowiedź od razu na swoim miejscu */
+.fb-pasek{position:absolute;top:12px;left:12px;right:12px;z-index:3;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 16px 8px 8px;border-radius:99px;background:#FFF1E6;color:var(--ciemny);animation:fbIn .28s cubic-bezier(.2,1.4,.4,1) both}
+.fb-pasek .fb-znak{width:44px;height:44px;background:var(--pomarancz)}
+.fb-pasek .fb-znak svg{width:26px;height:26px}
+.fb-pasek b{font-size:22px}
+.fb-pasek-t{font-size:16px;opacity:.8}
+.luka.poprawna,.ans.poprawna{background:#7FA055;color:#fff;box-shadow:none;animation:pop .4s ease}
+.ans-zle{min-width:0;background:transparent;box-shadow:none;color:inherit;opacity:.55;font-size:28px;padding:0 4px}
+.pad button.dalej,.abc-akcje .dalej,.btn.dalej{background:var(--atrament);color:#fff;opacity:1}
+@media (min-width:700px){ .fb-pasek b{font-size:28px} .fb-pasek-t{font-size:18px} }
 </style>
 </head>
 <body>
@@ -1116,27 +1126,27 @@ function zadanie(){
   const zablokuj = fb ? " disabled" : "";
   if (t.typ === "liczby") {
     tresc = `<div class="mega q">${esc(z.pytanie)}</div>
-      <div class="ansrow"><span class="mega eq">=</span><span class="ans" aria-live="polite" aria-label="Twoja odpowiedź">${esc(fb ? fb.wpis : R.input) || "?"}</span></div>`;
+      <div class="ansrow"><span class="mega eq">=</span>${fb && !fb.ok ? `<span class="ans ans-zle" aria-label="Wpisane: ${esc(fb.wpis)}"><s>${esc(fb.wpis)}</s></span>` : ""}<span class="ans${fb && !fb.ok ? " poprawna" : ""}" aria-live="polite" aria-label="${fb && !fb.ok ? "Dobra odpowiedź" : "Twoja odpowiedź"}">${esc(fb && !fb.ok ? z.odp : fb ? fb.wpis : R.input) || "?"}</span></div>`;
     sterowanie = `<div class="pad">${[1,2,3,4,5,6,7,8,9].map(d => `<button data-act="cyfra" data-d="${d}"${zablokuj}>${d}</button>`).join("")}
-      <button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button data-act="cyfra" data-d="0"${zablokuj}>0</button><button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button></div>`;
+      <button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button data-act="cyfra" data-d="0"${zablokuj}>0</button>${fb && !fb.ok ? `<button class="ok dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button>`}</div>`;
   } else if (t.typ === "litery") {
     const [przed, po] = z.wzor.split(/\[.+?\]/);
     const w = fb ? fb.wpis : R.input;
     tresc = `<div class="papier">${obrazek(z.obrazek)}</div>
-      <div class="mega slowo" aria-label="Słowo z luką">${znaki(przed)}<span class="luka${w ? "" : " pusta"}" aria-live="polite">${esc(w) || "?"}</span>${znaki(po)}</div>`;
+      <div class="mega slowo" aria-label="Słowo z luką">${znaki(przed)}${fb && !fb.ok ? `<span class="luka poprawna" aria-live="polite" aria-label="Dobra odpowiedź: ${esc(z.odp)}">${esc(z.odp)}</span>` : `<span class="luka${w ? "" : " pusta"}" aria-live="polite">${esc(w) || "?"}</span>`}${znaki(po)}</div>`;
     const klaw = KLAWIATURY[t.klawiatura];
     sterowanie = `<div class="klaw"><div class="abc${t.klawiatura === "polska" ? " pl" : ""}">${klaw.map(l => `<button class="${SPECJALNE.includes(l) ? "spec" : ""}" data-act="litera" data-l="${l}"${zablokuj}>${l}</button>`).join("")}</div>
-      <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button></div></div>`;
+      <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button>${fb && !fb.ok ? `<button class="ok dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button>`}</div></div>`;
   } else {
     tresc = t.obrazkiem
       ? `<div class="papier">${obrazek(z.obrazek)}</div>`
       : `<div class="mega slowo-ang" lang="en">${esc(z.slowoAng)}</div>${mowa ? `<button class="glosnik" data-act="czytaj" aria-label="Posłuchaj">${ICO_GLOS}</button>` : ""}`;
     const wyb = fb ? fb.wpis : R.wybor;
     sterowanie = `<div class="opcje">${z.opcje.map(o => `<button class="opcja${fb && o.id === z.odp ? " dobra" : ""}${fb && !fb.ok && o.id === wyb ? " zla" : ""}" data-act="wybierz-opcje" data-o="${esc(o.id)}" aria-pressed="${wyb === o.id}" aria-label="${esc(o.etykieta)}"${o.mow ? ' lang="en"' : ""}${zablokuj}>${o.html}</button>`).join("")}</div>
-      <button class="btn btn-ikona" data-act="ok" aria-label="Sprawdź" ${R.wybor === null || fb ? "disabled" : ""}>${ICO_OK}</button>`;
+      ${fb && !fb.ok ? `<button class="btn btn-ikona dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="btn btn-ikona" data-act="ok" aria-label="Sprawdź" ${R.wybor === null || fb ? "disabled" : ""}>${ICO_OK}</button>`}`;
   }
   // informacja zwrotna od razu po odpowiedzi
-  const info = fb ? `<div class="fb ${fb.ok ? "fb-ok" : "fb-nie"}" role="status">
+  const info = fb && !fb.ok ? `<div class="fb-pasek" role="status"><span class="fb-znak" aria-hidden="true">${ICO_X}</span><b class="mega">${esc(fb.tekst)}</b><span class="fb-pasek-t">Tak jest dobrze:</span></div>` : fb ? `<div class="fb ${fb.ok ? "fb-ok" : "fb-nie"}" role="status">
       ${pegaz({ mina: fb.ok ? "aha" : "zakr", cls: "pegaz fb-pegaz" })}
       <div class="fb-tekst"><span class="fb-znak" aria-hidden="true">${fb.ok ? ICO_OK : ICO_X}</span><b class="mega">${esc(fb.tekst)}</b>
       ${fb.ok ? "" : `<span class="fb-dobrze">${fb.dobrzeHtml}</span>`}</div>
@@ -1152,7 +1162,7 @@ function zadanie(){
     <section class="card${nowe ? " pop" : ""}" style="background:${bg};color:${fg};--kolor:${bg}">
       <button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(t.polecenie)}</span></button>
       ${tresc}
-      ${fb ? "" : `<svg class="pegaz-chmurka" viewBox="0 0 160 70" aria-hidden="true"><path d="M14 70q-14-2-10-18q4-14 20-12q4-20 28-20q14 0 22 10q10-18 32-14q20 4 22 22q20-4 26 12q6 16-8 20z" fill="#FCF7F2"/></svg>` + pegaz({ mina: "skup" })}
+      ${fb && fb.ok ? "" : `<svg class="pegaz-chmurka" viewBox="0 0 160 70" aria-hidden="true"><path d="M14 70q-14-2-10-18q4-14 20-12q4-20 28-20q14 0 22 10q10-18 32-14q20 4 22 22q20-4 26 12q6 16-8 20z" fill="#FCF7F2"/></svg>` + pegaz({ mina: fb ? "zakr" : "skup" })}
       ${info}
     </section>
     ${sterowanie}
@@ -1190,7 +1200,6 @@ function zatwierdz(){
     pokazWpis = (z.opcje.find(o => o.id === wpis) || {}).etykieta || wpis;
     const dobra = z.opcje.find(o => o.id === z.odp);
     dobrzeHtml = t.id === "ang-kolory" ? `<span class="mini-plama">${dobra.html}</span>` : t.id === "ang-liczby" ? `<b class="mega duza">${z.odp}</b>` : `<b class="mega duza" lang="en">${esc(z.odp)}</b>`;
-    if (t.czytaj || t.obrazkiem) setTimeout(() => powiedz(z.slowoAng || z.odp), 150);
   } else {
     wpis = R.input.trim(); if (!wpis) return;
     const dobre = z.odp.split("/").map(norm).filter(Boolean);
