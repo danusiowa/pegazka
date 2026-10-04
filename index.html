@@ -381,8 +381,8 @@ nav.tabs button[aria-current="page"] i{--ikona-srodek:#EFD353}
 .grupka.gduzo .mini{width:34px;height:34px}
 /* informacja zwrotna po odpowiedzi */
 .fb{position:absolute;inset:0;border-radius:inherit;display:flex;align-items:center;gap:12px;padding:18px;animation:fbIn .28s cubic-bezier(.2,1.4,.4,1) both}
-.fb-ok{background:rgba(238,245,230,.97);color:var(--ciemny)}
-.fb-nie{background:rgba(255,241,230,.97);color:var(--ciemny);flex-wrap:wrap;align-content:center}
+.fb-ok{background:#EEF5E6;color:var(--ciemny)}
+.fb-nie{background:#FFF1E6;color:var(--ciemny);flex-wrap:wrap;align-content:center}
 .fb .fb-pegaz{position:static;width:130px;height:120px;flex:none}
 .fb-tekst{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
 .fb-tekst b{font-size:32px;line-height:1.1}
@@ -523,7 +523,7 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   #app[data-ekran="zadanie"] .slowo{font-size:clamp(60px,10vh,92px)}
 }
 /* błąd: dobra odpowiedź od razu na swoim miejscu */
-.fb-pasek{position:absolute;top:12px;left:12px;right:12px;z-index:3;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 16px 8px 8px;border-radius:99px;background:#FFF1E6;color:var(--ciemny);animation:fbIn .28s cubic-bezier(.2,1.4,.4,1) both}
+.fb-pasek{position:relative;align-self:flex-start;margin:-6px 0 0 -6px;z-index:3;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 16px 8px 8px;border-radius:99px;background:#FFF1E6;color:var(--ciemny);animation:fbIn .28s cubic-bezier(.2,1.4,.4,1) both}
 .fb-pasek .fb-znak{width:44px;height:44px;background:var(--pomarancz)}
 .fb-pasek .fb-znak svg{width:26px;height:26px}
 .fb-pasek b{font-size:22px}
@@ -1173,10 +1173,10 @@ function zadanie(){
   <main class="screen" style="padding-top:12px">
     ${pytanieOWyjscie ? `<div class="confirm"><span class="mega">Wychodzimy?</span><div><button data-act="zostan" aria-label="Zostaję">${ICO_DALEJ}</button><button class="go" data-act="przerwij" aria-label="Wyjdź do menu">${ICO_DOM}</button></div></div>` : ""}
     <section class="card${nowe ? " pop" : ""}" style="background:${bg};color:${fg};--kolor:${bg}">
-      <button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(z.polecenie || t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(z.polecenie || t.polecenie)}</span></button>
+      ${fb && !fb.ok ? info : `<button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(z.polecenie || t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(z.polecenie || t.polecenie)}</span></button>`}
       ${tresc}
       ${fb && fb.ok ? "" : `<svg class="pegaz-chmurka" viewBox="0 0 160 70" aria-hidden="true"><path d="M14 70q-14-2-10-18q4-14 20-12q4-20 28-20q14 0 22 10q10-18 32-14q20 4 22 22q20-4 26 12q6 16-8 20z" fill="#FCF7F2"/></svg>` + pegaz({ mina: fb ? "zakr" : "skup" })}
-      ${info}
+      ${fb && fb.ok ? info : ""}
     </section>
     ${sterowanie}
   </main>`;
@@ -1194,7 +1194,7 @@ function dopasujSlowo(){
   const card = app.querySelector(".card"); if (!card) return;
   const peg = card.querySelector(".pegaz");
   const st = getComputedStyle(card);
-  const wolne = card.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight) - (peg ? peg.getBoundingClientRect().width * .95 : 0);
+  const wolne = card.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight) - (peg ? peg.getBoundingClientRect().width + 12 : 0);
   card.querySelectorAll(".slowo, .slowo-ang, .q").forEach(w => {
     w.style.fontSize = "";
     let fs = parseFloat(getComputedStyle(w).fontSize);
