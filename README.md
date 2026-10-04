@@ -56,7 +56,7 @@ Dodawanie i odejmowanie **do 10**, **do 20** i **do 100**. Wynik wpisuje się na
 - **Powitanie:** po wejściu Pegazka wlatuje i mówi „Cześć!”. Stuknięcie pomija animację.
 - **Ekran główny:** duże kafelki z rysunkami i prawie bez słów. Stuknięcie kafelka od razu zaczyna rundę.
   Pegazka co kilka sekund robi coś zabawnego (skacze, robi fikołka, rozgląda się, tańczy,
-  zasypia, kicha brokatem, puszcza serduszka). Stuknięta też robi sztuczkę.
+  zasypia, kicha brokatem, puszcza serduszka). Stuknięta też robi sztuczkę, po cichu.
 - **Runda:** 10 zadań. Pasek postępu na górze, ✕ pozwala wyjść (z pytaniem, czy na pewno).
 - **Po każdej odpowiedzi** od razu widać, czy było dobrze:
   - dobrze: „Super!”, krótki dźwięk, brokat i apka sama przechodzi dalej,
@@ -78,6 +78,8 @@ Na tablecie zapamiętywane jest tylko to, co zostało w talii. To nie są wyniki
 
 ### Dźwięk
 - Słowa i polecenia czyta głos wbudowany w tablet. Apka wybiera najlepszy dostępny głos.
+- Samo czyta tylko tam, gdzie dźwięk jest pytaniem: **piszę** (słowo ze słuchu) i angielskie „posłuchaj i wybierz”.
+  W pozostałych zadaniach słowo czyta się po stuknięciu w obrazek, w głośnik albo w polecenie.
   Gdy tablet nie ma polskiego głosu, głośnik przy polskich poleceniach się nie pokazuje.
 - Najlepiej brzmi ulepszony głos:
   - **iPad:** Ustawienia → Dostępność → Treść mówiona → Głosy → Polski → *Zosia (Ulepszony)*,

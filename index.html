@@ -223,6 +223,7 @@ svg.jabl{width:18px;height:18px;flex:none}
 .card .q,.card .eq{color:inherit}
 .card .ansrow{max-width:66%}
 .ans{box-shadow:inset 0 0 0 3px rgba(46,40,70,.25)}
+.papier-glos{cursor:pointer;transition:transform .12s}.papier-glos:active{transform:rotate(-2deg) scale(.95)}
 .papier{width:clamp(120px,32vw,170px);aspect-ratio:1;border-radius:24px;background:#EEF4F2;display:grid;place-items:center;transform:rotate(-2deg);box-shadow:0 4px 0 rgba(46,40,70,.12)}
 .papier .obr{width:84%;height:84%}
 .slowo{color:inherit;max-width:none;width:max-content;flex-wrap:nowrap;white-space:nowrap}
@@ -576,7 +577,7 @@ function literki(lista){
   return lista.map(s => {
     const odp = s.match(/\[(.+?)\]/)[1];
     const slowo = s.replace(/[\[\]]/g, "");
-    return { klucz: slowo, obrazek: kluczObrazka(slowo), wzor: s, odp, pytanie: s.replace(/\[.+?\]/, "_"), pokaz: slowo };
+    return { klucz: slowo, obrazek: kluczObrazka(slowo), wzor: s, odp, pytanie: s.replace(/\[.+?\]/, "_"), pokaz: slowo, slowoPL: slowo };
   });
 }
 /* --- dodawanie i odejmowanie --- */
@@ -630,7 +631,7 @@ const TEMATY = [
         const syl = w.split("-"), slowo = syl.join("");
         // w słowach z dwiema sylabami zgadujemy każdą z nich, w dłuższych jedną (stałą), żeby pula nie była za duża
         const luki = syl.length === 2 ? [0, 1] : [(slowo.length * 7) % syl.length];
-        return luki.map(k => ({ klucz: slowo + "-" + k, sylaby: syl, luka: k, odp: syl[k], obrazek: kluczObrazka(slowo), pokaz: syl.join("-"), pytanie: slowo, slowoPL: slowo, czytaj: true, grupa: slowo }));
+        return luki.map(k => ({ klucz: slowo + "-" + k, sylaby: syl, luka: k, odp: syl[k], obrazek: kluczObrazka(slowo), pokaz: syl.join("-"), pytanie: slowo, slowoPL: slowo, grupa: slowo }));
       }),
     opcje(z){
       const wszystkie = [...new Set(pula(this).flatMap(x => x.sylaby))].filter(x => x !== z.odp);
@@ -644,7 +645,7 @@ const TEMATY = [
     polecenie: "Ułóż słowo z literek", tlo: "#F2CFC9", napis: "#2E2846",
     zadania: () => ["kot", "dom", "las", "sok", "ser", "lew", "lis", "pies", "auto", "sowa", "koza", "lama", "buty", "ryba", "lody",
       "kura", "tort", "krab", "wilk", "owca", "balon", "banan", "zebra", "panda", "rower", "zegar", "arbuz", "dynia", "jajko", "motyl"]
-      .map(w => ({ klucz: w, obrazek: kluczObrazka(w), odp: w, pokaz: w, pytanie: w, slowoPL: w, czytaj: true })),
+      .map(w => ({ klucz: w, obrazek: kluczObrazka(w), odp: w, pokaz: w, pytanie: w, slowoPL: w })),
     opcje(z){
       // pomieszane literki, nigdy w dobrej kolejności
       let lit = z.odp.split("");
@@ -1251,11 +1252,15 @@ function zadanie(){
   let tresc = "", sterowanie = "";
   R.uzyte = R.uzyte || [];
   const zablokuj = fb ? " disabled" : "";
+  // obrazek do stuknięcia: czyta słowo na głos (tylko gdy tablet ma polski głos)
+  const papier = () => z.slowoPL && maGlos("pl")
+    ? `<button class="papier papier-glos" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${obrazek(z.obrazek)}</button>`
+    : `<div class="papier">${obrazek(z.obrazek)}</div>`;
   const kratkiHtml = (w, zle) => z.odp.split("").map((lit, k) => {
       const pokaz = zle ? lit : (w[k] || "");
       return `<span class="kratka${zle ? " poprawna" : pokaz ? "" : " pusta"}${!fb && k === w.length ? " teraz" : ""}">${esc(pokaz)}</span>`;
     }).join("");
-  const gora = () => `<div class="pis-gora"><div class="papier">${obrazek(z.obrazek)}</div>${maGlos("pl") ? `<button class="glosnik" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${ICO_GLOS}</button>` : ""}</div>`;
+  const gora = () => `<div class="pis-gora">${papier()}${maGlos("pl") ? `<button class="glosnik" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${ICO_GLOS}</button>` : ""}</div>`;
   const okLubDalej = (gotowe, cls = "ok") => fb && !fb.ok ? `<button class="${cls} dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="${cls}" data-act="ok" aria-label="Sprawdź"${fb || !gotowe ? " disabled" : ""}>${ICO_OK}</button>`;
   if (t.typ === "rozsypanka") {
     const w = fb ? fb.wpis : R.input, zle = fb && !fb.ok;
@@ -1283,7 +1288,7 @@ function zadanie(){
       const pokaz = zle ? lit : (w[k] || "");
       return `<span class="kratka${zle ? " poprawna" : pokaz ? "" : " pusta"}${!fb && k === w.length ? " teraz" : ""}">${esc(pokaz)}</span>`;
     }).join("");
-    tresc = `<div class="pis-gora"><div class="papier">${obrazek(z.obrazek)}</div>${maGlos("pl") ? `<button class="glosnik" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${ICO_GLOS}</button>` : ""}</div>
+    tresc = `<div class="pis-gora">${papier()}${maGlos("pl") ? `<button class="glosnik" data-act="czytaj-pl" aria-label="Posłuchaj słowa">${ICO_GLOS}</button>` : ""}</div>
       ${zle ? `<div class="mega pis-wpisane" aria-label="Wpisane: ${esc(fb.wpis)}"><s>${esc(fb.wpis)}</s></div>` : ""}
       <div class="mega kratki" aria-live="polite" aria-label="${zle ? "Dobra odpowiedź: " + esc(z.odp) : "Twoje słowo: " + esc(w)}">${kratki}</div>`;
     const klaw = KLAWIATURY[t.klawiatura];
@@ -1292,15 +1297,15 @@ function zadanie(){
   } else if (t.typ === "litery") {
     const [przed, po] = z.wzor.split(/\[.+?\]/);
     const w = fb ? fb.wpis : R.input;
-    tresc = `<div class="papier">${obrazek(z.obrazek)}</div>
+    tresc = `${papier()}
       <div class="mega slowo" aria-label="Słowo z luką">${znaki(przed)}${fb && !fb.ok ? `<span class="luka poprawna" aria-live="polite" aria-label="Dobra odpowiedź: ${esc(z.odp)}">${esc(z.odp)}</span>` : `<span class="luka${w ? "" : " pusta"}" aria-live="polite">${esc(w) || "?"}</span>`}${znaki(po)}</div>`;
     const klaw = KLAWIATURY[t.klawiatura];
     sterowanie = `<div class="klaw"><div class="abc${t.klawiatura === "polska" ? " pl" : ""}">${klaw.map(l => `<button class="${SPECJALNE.includes(l) ? "spec" : ""}" data-act="litera" data-l="${l}"${zablokuj}>${l}</button>`).join("")}</div>
       <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button>${fb && !fb.ok ? `<button class="ok dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button>`}</div></div>`;
   } else {
     tresc = z.obrazek && !z.slowoAng
-      ? `<div class="papier">${obrazek(z.obrazek)}</div>`
-      : `<div class="mega slowo-ang" lang="en">${esc(z.slowoAng)}</div>${maGlos("en") ? `<button class="glosnik" data-act="czytaj" aria-label="Posłuchaj">${ICO_GLOS}</button>` : ""}`;
+      ? `${papier()}`
+      : `<button class="mega slowo-ang" lang="en" data-act="czytaj" aria-label="Posłuchaj: ${esc(z.slowoAng)}">${esc(z.slowoAng)}</button>${maGlos("en") ? `<button class="glosnik" data-act="czytaj" aria-label="Posłuchaj">${ICO_GLOS}</button>` : ""}`;
     const wyb = fb ? fb.wpis : R.wybor;
     sterowanie = `<div class="opcje">${z.opcje.map(o => `<button class="opcja${fb && o.id === z.odp ? " dobra" : ""}${fb && !fb.ok && o.id === wyb ? " zla" : ""}" data-act="wybierz-opcje" data-o="${esc(o.id)}" aria-pressed="${wyb === o.id}" aria-label="${esc(o.etykieta)}"${o.mow ? ' lang="en"' : ""}${zablokuj}>${o.html}</button>`).join("")}</div>
       ${fb && !fb.ok ? `<button class="btn btn-ikona dalej" data-act="dalej" aria-label="Dalej">${ICO_DALEJ}</button>` : `<button class="btn btn-ikona" data-act="ok" aria-label="Sprawdź" ${R.wybor === null || fb ? "disabled" : ""}>${ICO_OK}</button>`}`;
@@ -1481,7 +1486,7 @@ const SZTUCZKI = {
 };
 let ostatnieSztuczki = [];
 const ruchOgraniczony = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-function sztuczka(odStukniecia){
+function sztuczka(){
   const h = document.querySelector(".hero"), svg = h && h.querySelector(".pegaz");
   if (!svg || h.dataset.s || ruchOgraniczony()) return;
   const mozliwe = Object.keys(SZTUCZKI).filter(k => !ostatnieSztuczki.includes(k));
@@ -1500,7 +1505,6 @@ function sztuczka(odStukniecia){
     efekt.innerHTML = sz.efekt();
     h.appendChild(efekt);
   }
-  if (odStukniecia) dzwiek("pyk");
   setTimeout(() => {
     if (!h.isConnected) return;
     delete h.dataset.s;
@@ -1508,12 +1512,12 @@ function sztuczka(odStukniecia){
     if (efekt) efekt.remove();
   }, sz.czas);
 }
-setInterval(() => { if (ekran === "start" && !document.hidden) sztuczka(false); }, 5200);
+setInterval(() => { if (ekran === "start" && !document.hidden) sztuczka(); }, 5200);
 app.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const a = b.dataset.act;
   if (a === "dalej-powitanie") { koniecPowitania(); return; }
-  if (a === "sztuczka") { sztuczka(true); return; }
+  if (a === "sztuczka") { sztuczka(); return; }
   if (a === "pyk") { b.classList.add("pek"); b.disabled = true; dzwiek("pyk"); return; }
   if (a === "ekran") { clearTimeout(autoDalej); R = null; ekran = b.dataset.to; render(); window.scrollTo({ top: 0 }); }
   else if (a === "runda") zacznijRunde(b.dataset.t);
