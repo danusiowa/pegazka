@@ -114,7 +114,8 @@ nav.tabs button[aria-current="page"] i{color:var(--ciemny);background:var(--zolt
 .card .ansrow{display:flex;align-items:center;gap:10px;max-width:64%}
 .card .eq{font-size:44px}
 .ans{min-width:110px;height:70px;padding:0 14px;border-radius:18px;background:var(--kartka);color:var(--atrament);display:grid;place-items:center;font-family:var(--mega);font-weight:800;font-size:40px;box-shadow:inset 0 0 0 3px var(--zolty)}
-.card .pegaz{position:absolute;right:6px;bottom:8px;width:112px;height:108px}
+.card .pegaz{position:absolute;right:14px;bottom:14px;width:112px;height:108px;z-index:1}
+.pegaz-chmurka{position:absolute;right:-4px;bottom:0;width:150px;height:auto}
 /* literki: obrazek i słowo z luką */
 .obrazek{font-size:clamp(72px,22vw,110px);line-height:1;align-self:flex-start;filter:drop-shadow(0 4px 0 rgba(0,0,0,.12))}
 .slowo{display:flex;align-items:center;flex-wrap:wrap;gap:2px;font-size:clamp(40px,12vw,60px);line-height:1.1;color:var(--kartka);max-width:66%}
@@ -144,7 +145,7 @@ nav.tabs button[aria-current="page"] i{color:var(--ciemny);background:var(--zolt
 .opcja .grupka{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 4px;max-width:150px;font-size:24px;line-height:1.15}
 .opcja .plama{width:74px;height:74px}
 .opcja .nazwa{font-family:var(--mega);font-weight:800;font-size:28px;display:flex;align-items:center;gap:8px}
-.opcja .nazwa svg{width:20px;height:20px;opacity:.6}
+.opcja .nazwa svg{width:28px;height:28px;opacity:.75}
 .confirm{border-radius:16px;background:var(--lila);color:var(--ciemny);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:500}
 .confirm div{display:flex;gap:8px}
 .confirm button{min-height:44px;padding:0 16px;border-radius:99px;font-weight:700;background:var(--kartka)}
@@ -283,6 +284,7 @@ ul.zad li span:last-child{white-space:nowrap}
   .card .label{font-size:18px}
   .card .q{font-size:76px}
   .card .pegaz{width:160px;height:154px}
+  .pegaz-chmurka{width:206px}
   .obrazek{font-size:130px}
   .slowo{font-size:72px}
   .slowo-ang{font-size:84px}
@@ -495,6 +497,29 @@ nav.tabs button[aria-current="page"] i{--ikona-srodek:#EFD353}
 @keyframes nuta{0%{opacity:0;transform:translateY(0) rotate(-10deg)}15%{opacity:1}100%{opacity:0;transform:translateY(-50vh) rotate(15deg)}}
 @media (prefers-reduced-motion:reduce){.nb-balon,.nb-banka,.nb-gwiazda,.nb-nuta,.niesp-pegaz,.nb-tecza path{animation:none!important}.nb-balon,.nb-banka{bottom:30%}.nb-tecza path{stroke-dashoffset:0}}
 .hero .stan{font-size:18px;max-width:52%}
+/* poprawki UX */
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.card .label{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;text-align:left;padding:6px 14px 6px 6px;margin:-6px 0 0 -6px;border-radius:99px;background:rgba(252,247,242,.55);color:inherit;max-width:100%}
+.card .label .mega{font-size:17px}
+.label-glos{width:40px;height:40px;border-radius:50%;background:var(--kartka);display:grid;place-items:center;flex:none;color:var(--ciemny)}
+.label-glos svg{width:22px;height:22px}
+.pad button.ok:disabled,.abc-akcje .ok:disabled{opacity:.35}
+.tile:active,.opcja:active,.pad button:active,.abc button:active,.btn:active{transform:scale(.96)}
+@media (min-width:700px){ .card .label .mega{font-size:20px} }
+/* poziomo: wszystko większe i na środku, bez pustego dołu */
+@media (min-width:1000px), (min-width:880px) and (orientation:landscape){
+  #app[data-ekran="zadanie"]{min-height:100vh}
+  #app[data-ekran="zadanie"] .screen{flex-grow:1;align-content:center;padding-bottom:24px}
+  #app[data-ekran="zadanie"] .card{min-height:min(600px,calc(100vh - 130px));justify-content:space-between}
+  #app[data-ekran="zadanie"] .klaw,#app[data-ekran="zadanie"] .pad,#app[data-ekran="zadanie"] .opcje{align-self:center}
+  #app[data-ekran="zadanie"] .abc button{height:clamp(64px,10vh,88px)}
+  #app[data-ekran="zadanie"] .abc-akcje button{height:clamp(70px,11vh,96px)}
+  #app[data-ekran="zadanie"] .pad button{height:clamp(80px,13vh,112px)}
+  #app[data-ekran="zadanie"] .opcja{min-height:clamp(150px,22vh,220px)}
+  #app[data-ekran="zadanie"] .papier{width:clamp(180px,26vh,260px)}
+  #app[data-ekran="zadanie"] .card .q{font-size:clamp(64px,12vh,110px)}
+  #app[data-ekran="zadanie"] .slowo{font-size:clamp(60px,10vh,92px)}
+}
 </style>
 </head>
 <body>
@@ -517,7 +542,7 @@ nav.tabs button[aria-current="page"] i{--ikona-srodek:#EFD353}
 const NAZWA = "Pegazka";
 document.title = NAZWA;
 const IMIE = { M: "Pegazka", D: "Pegazki", B: "Pegazkę" };
-const DLUGOSC_RUNDY = 15;
+const DLUGOSC_RUNDY = 10;   // krótkie rundy: małe dziecko kończy, zanim się znudzi
 const PROG = 0.8; // ile dobrych odpowiedzi (część rundy) trzeba, żeby dzień dał nową rzecz na łące: 12/15
 
 /* --- literki: słowo z luką w nawiasie [ ]; obrazek dobierany po słowie --- */
@@ -662,7 +687,36 @@ function powiedz(tekst){
     speechSynthesis.speak(u);
   } catch (e) {}
 }
+/* Czytanie polecenia po polsku (dla dzieci, które jeszcze słabo czytają). */
+function powiedzPL(tekst){
+  if (!mowa) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(tekst);
+    const g = speechSynthesis.getVoices().find(v => /^pl/i.test(v.lang));
+    if (g) u.voice = g;
+    u.lang = "pl-PL"; u.rate = 0.9;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
 if (mowa) try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch (e) {}
+
+/* Krótkie, ciche dźwięki: dobrze, źle, koniec rundy, pęknięty balon. Bez plików. */
+let audio = null;
+function dzwiek(rodzaj){
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === "suspended") audio.resume();
+    const nuty = { ok: [[660, 0], [880, .09]], zle: [[330, 0], [262, .14]], koniec: [[523, 0], [659, .1], [784, .2], [1047, .3]], pyk: [[1200, 0]] }[rodzaj] || [];
+    nuty.forEach(([f, t]) => {
+      const o = audio.createOscillator(), g = audio.createGain(), t0 = audio.currentTime + t;
+      o.type = rodzaj === "pyk" ? "triangle" : "sine"; o.frequency.setValueAtTime(f, t0);
+      if (rodzaj === "pyk") o.frequency.exponentialRampToValueAtTime(300, t0 + .08);
+      g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(rodzaj === "zle" ? .08 : .12, t0 + .015); g.gain.exponentialRampToValueAtTime(.0001, t0 + (rodzaj === "koniec" ? .35 : .18));
+      o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0 + .4);
+    });
+  } catch (e) {}
+}
 
 /* =====================================================================
    MASKOTKA: pegazorożka w stylu wycinanki
@@ -1041,7 +1095,7 @@ function zadanie(){
     tresc = `<div class="mega q">${esc(z.pytanie)}</div>
       <div class="ansrow"><span class="mega eq">=</span><span class="ans" aria-live="polite" aria-label="Twoja odpowiedź">${esc(fb ? fb.wpis : R.input) || "?"}</span></div>`;
     sterowanie = `<div class="pad">${[1,2,3,4,5,6,7,8,9].map(d => `<button data-act="cyfra" data-d="${d}"${zablokuj}>${d}</button>`).join("")}
-      <button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button data-act="cyfra" data-d="0"${zablokuj}>0</button><button class="ok" data-act="ok" aria-label="Sprawdź"${zablokuj}>${ICO_OK}</button></div>`;
+      <button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button data-act="cyfra" data-d="0"${zablokuj}>0</button><button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button></div>`;
   } else if (t.typ === "litery") {
     const [przed, po] = z.wzor.split(/\[.+?\]/);
     const w = fb ? fb.wpis : R.input;
@@ -1049,7 +1103,7 @@ function zadanie(){
       <div class="mega slowo" aria-label="Słowo z luką">${esc(przed)}<span class="luka${w ? "" : " pusta"}" aria-live="polite">${esc(w) || "?"}</span>${esc(po)}</div>`;
     const klaw = KLAWIATURY[t.klawiatura];
     sterowanie = `<div class="klaw"><div class="abc${t.klawiatura === "polska" ? " pl" : ""}">${klaw.map(l => `<button class="${SPECJALNE.includes(l) ? "spec" : ""}" data-act="litera" data-l="${l}"${zablokuj}>${l}</button>`).join("")}</div>
-      <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button class="ok" data-act="ok" aria-label="Sprawdź"${zablokuj}>${ICO_OK}</button></div></div>`;
+      <div class="abc-akcje"><button class="del" data-act="usun" aria-label="Usuń"${zablokuj}>${ICO_USUN}</button><button class="ok" data-act="ok" aria-label="Sprawdź"${fb || !R.input ? " disabled" : ""}>${ICO_OK}</button></div></div>`;
   } else {
     tresc = t.obrazkiem
       ? `<div class="papier">${obrazek(z.obrazek)}</div>`
@@ -1073,9 +1127,9 @@ function zadanie(){
   <main class="screen" style="padding-top:12px">
     ${pytanieOWyjscie ? `<div class="confirm"><span class="mega">Wychodzimy?</span><div><button data-act="zostan" aria-label="Zostaję">${ICO_DALEJ}</button><button class="go" data-act="przerwij" aria-label="Wyjdź do menu">${ICO_DOM}</button></div></div>` : ""}
     <section class="card${nowe ? " pop" : ""}" style="background:${bg};color:${fg};--kolor:${bg}">
-      <span class="mega label">${esc(t.polecenie)}</span>
+      <button class="label" data-act="czytaj-polecenie" aria-label="Posłuchaj polecenia: ${esc(t.polecenie)}">${mowa ? `<span class="label-glos">${ICO_GLOS}</span>` : ""}<span class="mega">${esc(t.polecenie)}</span></button>
       ${tresc}
-      ${fb ? "" : pegaz({ mina: "skup" })}
+      ${fb ? "" : `<svg class="pegaz-chmurka" viewBox="0 0 160 70" aria-hidden="true"><path d="M14 70q-14-2-10-18q4-14 20-12q4-20 28-20q14 0 22 10q10-18 32-14q20 4 22 22q20-4 26 12q6 16-8 20z" fill="#FCF7F2"/></svg>` + pegaz({ mina: "skup" })}
       ${info}
     </section>
     ${sterowanie}
@@ -1108,6 +1162,7 @@ function zatwierdz(){
   R.fb = { ok, wpis, tekst: ok ? BRAWO_KROTKO[Math.floor(Math.random() * BRAWO_KROTKO.length)] : PRAWIE_KROTKO[Math.floor(Math.random() * PRAWIE_KROTKO.length)], dobrzeHtml };
   render();
   clearTimeout(autoDalej);
+  dzwiek(ok ? "ok" : "zle");
   if (ok) autoDalej = setTimeout(dalej, 1200);
 }
 function dalej(){
@@ -1127,7 +1182,7 @@ function zakonczRunde(){
     dobre: R.odpowiedzi.filter(o => o.dobrze).length, wszystkie: R.odpowiedzi.length,
     ms: teraz.getTime() - R.start
   };
-  ostatnia = runda; R = null; ekran = "brawo";
+  ostatnia = runda; R = null; ekran = "brawo"; setTimeout(() => dzwiek("koniec"), 150);
   render(); window.scrollTo({ top: 0 });
 }
 
@@ -1198,7 +1253,7 @@ app.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const a = b.dataset.act;
   if (a === "dalej-powitanie") { koniecPowitania(); return; }
-  if (a === "pyk") { b.classList.add("pek"); b.disabled = true; return; }
+  if (a === "pyk") { b.classList.add("pek"); b.disabled = true; dzwiek("pyk"); return; }
   if (a === "ekran") { clearTimeout(autoDalej); R = null; ekran = b.dataset.to; render(); window.scrollTo({ top: 0 }); }
   else if (a === "runda") zacznijRunde(b.dataset.t);
   else if (a === "cyfra") wpiszZnak(b.dataset.d);
@@ -1206,6 +1261,7 @@ app.addEventListener("click", async e => {
   else if (a === "usun") { if (R && !R.fb) { R.input = R.input.slice(0, -1); render(); } }
   else if (a === "wybierz-opcje") { if (R.fb) return; R.wybor = b.dataset.o; const o = R.lista[R.i].opcje.find(x => x.id === R.wybor); if (o && o.mow) powiedz(o.mow); render(); }
   else if (a === "czytaj") { const z = R.lista[R.i]; powiedz(z.slowoAng); }
+  else if (a === "czytaj-polecenie") { powiedzPL(R.temat.polecenie); }
   else if (a === "ok") zatwierdz();
   else if (a === "dalej") dalej();
   else if (a === "wyjdz") { pytanieOWyjscie = true; render(); }
