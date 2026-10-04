@@ -511,6 +511,8 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .nb-iskra svg{width:100%;height:100%;display:block}
 @keyframes iskraSpada{0%{transform:translate(0,0) rotate(0) scale(.6);opacity:0}10%{opacity:1}50%{transform:translate(var(--x),55vh) rotate(200deg) scale(1.1)}100%{transform:translate(0,110vh) rotate(420deg) scale(.7);opacity:.9}}
 .niesp-brokat .niesp-pegaz{animation:taniec 1.1s ease-in-out infinite alternate}
+/* na ciemnym tle (noc, brokat) ciemne nóżki by znikały: rozjaśniamy je */
+.niesp-brokat .p-nogi path,.niesp-noc .p-nogi path{stroke:#F2E8F7}
 @media (prefers-reduced-motion:reduce){.nb-fw i,.nb-noc-gw,.nb-kamyk,.nb-serce,.nb-kwiat,.nb-motyl,.nb-korona,.nb-konfetti,.nb-prezent,.nb-iskra,.niesp-chmurki .niesp-pegaz,.niesp-fikolek .niesp-pegaz,.niesp-korona .niesp-pegaz,.niesp-brokat .niesp-pegaz{animation:none!important}.nb-kwiat{transform:none}.nb-serce{bottom:30%}.nb-iskra,.nb-fw i{opacity:1}.nb-iskra{top:40%}.nb-kamyk.pek .skarb,.nb-prezent.pek .skarb{opacity:1;transform:none}.nb-prezent.pek .pudlo{opacity:0}.niesp-chmurki .niesp-pegaz{left:50%}}
 </style>
 </head>
