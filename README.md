@@ -4,6 +4,8 @@ Prosta apka do nauki dla dzieci z klas 1–3, zrobiona z myślą o tablecie.
 Pegazka, różowa pegazorożka w stylu papierowej wycinanki, ćwiczy razem z dzieckiem
 polski, matematykę i angielski.
 
+Apka powstała na prośbę córki i jest zrobiona specjalnie dla niej.
+
 **Apka:** https://danusiowa.github.io/pegazka/
 
 ## Jak wygląda
@@ -61,13 +63,28 @@ Dodawanie i odejmowanie **do 10**, **do 20** i **do 100**. Wynik wpisuje się na
 - **Po każdej odpowiedzi** od razu widać, czy było dobrze:
   - dobrze: „Super!”, krótki dźwięk, brokat i apka sama przechodzi dalej,
   - źle: dobra odpowiedź pojawia się na zielono w swoim miejscu, a ▶ prowadzi dalej.
-- **Po rundzie:** pochwała i jedna z 15 losowych niespodzianek. Pięć ostatnich się nie powtarza.
-  - do stukania: balony, bańki, serduszka, gwiazdki do zapalenia na nocnym niebie,
-    kamyki zamieniające się w kwiatki i prezenty do otwarcia,
-  - do oglądania: lot po tęczy, deszcz gwiazdek, taniec, bal w zamku z fajerwerkami,
-    magiczna łąka, skoki po chmurkach, fikołek, korona dla Pegazki i brokatowa burza.
+- **Po rundzie:** pochwała i jedna z 16 losowych niespodzianek. Pięć ostatnich się nie powtarza.
 
-  Niespodzianki się nie zbierają.
+  | Niespodzianka | Co robi dziecko |
+  |---|---|
+  | **Przebij balony!** | Przebija balony lecące do góry. |
+  | **Złap bańki!** | Przebija bańki mydlane. |
+  | **Serduszka dla Pegazki!** | Stuknięte serduszko leci do Pegazki, a ona podskakuje. |
+  | **Zapal gwiazdki!** | Zapala gwiazdki na nocnym niebie. |
+  | **Zaczaruj kamyki!** | Kamyki zamieniają się w kwiatki, motyle i inne skarby. |
+  | **Otwórz prezenty!** | Otwiera paczki, w środku są łakocie i tęcza. |
+  | **Przebieranki!** | Kostką zmienia strój Pegazki: królowa, czarodziejka, pilotka, leśna wróżka, kucharka. |
+  | **Nowa fryzura!** | Wybiera kolory grzywy i ogona (tęcza, cukierki, morze, słońce). |
+  | **Zerwij jabłka!** | Zrywa jabłka z drzewa do koszyka. Na koniec „Mniam, pyszności!”. |
+  | **Zagraj Pegazce!** | Gra na cymbałkach, a Pegazka tańczy. |
+  | **Wykąp Pegazkę!** | Zmywa plamy błota, piana znika i Pegazka błyszczy („Czyściutka!”). |
+  | **Magiczna łąka!** | Tam, gdzie stuknie, wyrasta kwiatek. |
+  | **Bal w zamku!** | Tam, gdzie stuknie w niebo, wybucha fajerwerk. |
+  | **Skaczemy po chmurkach!** | Pegazka skacze na stukniętą chmurkę. |
+  | **Fikołek!** | Każde stuknięcie to nowy fikołek. |
+  | **Lecimy po tęczy!**, **Brokatowa burza!** | Spokojne scenki do oglądania. |
+
+  W każdej niespodziance stuknięta Pegazka podskakuje. Niespodzianki się nie zbierają.
 - **Bez wyników i rankingów:** nie ma punktów, czasu, procentów, kalendarza ani kont.
 
 ### Losowanie zadań
@@ -119,6 +136,8 @@ Wszystko jest w `index.html`, w części `<script>`:
 - **Rysunki:** każde słowo potrzebuje rysunku w `OBR` (klucz to słowo bez polskich znaków,
   np. `zolw` dla „żółw”). Rysunki to płaskie kształty SVG w polu 100 × 100.
 - **Kolory:** pastelowa paleta zapisana na początku stylów (`:root`).
+- **Niespodzianki:** lista `NIESPODZIANKI` (tytuł, scenka i opcjonalnie coś na Pegazce).
+  Stukanie w nie obsługuje `NIESP_AKCJE`.
 
 ## Zasady
 
