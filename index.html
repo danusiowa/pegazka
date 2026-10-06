@@ -578,6 +578,14 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @keyframes szAha{0%,100%{transform:none}20%{transform:scale(1.08)}35%{transform:scale(.97)}50%{transform:scale(1.04)}}
 @keyframes szDrzemka{0%,100%{transform:none}50%{transform:scale(1.03,.96) rotate(2deg)}}
 @keyframes szPsik{0%,100%{transform:none}30%{transform:rotate(6deg) scale(1.03)}42%{transform:rotate(-10deg) translateX(-10px) scale(1.06,.94)}60%{transform:none}}
+/* TYMCZASOWO: tęczowa kupka */
+.hero-efekt:has(.hero-kupka){z-index:0}
+.hero-kupka{position:absolute;left:64%;bottom:-3%;width:31%;aspect-ratio:100/90;animation:kupkaSpada 3.6s ease-in forwards}
+.hero-kupka>svg{width:100%;height:100%;display:block}
+.hero-kupka .brokat{position:absolute;inset:-40% -30% 0}
+@keyframes kupkaSpada{0%,30%{opacity:0;transform:translateY(-120%) scale(.3)}36%{opacity:1}46%{transform:translateY(0) scale(1.15,.8)}54%{transform:scale(.95,1.08)}60%,85%{opacity:1;transform:none}100%{opacity:0;transform:scale(.8)}}
+@media (prefers-reduced-motion:no-preference){.hero[data-s="kupka"] .pegaz{animation:szKupka 3.6s ease-in-out}}
+@keyframes szKupka{0%,100%{transform:none}10%,32%{transform:scale(1.05,.92)}14%,22%{transform:scale(1.05,.92) translateX(-2px)}18%,26%{transform:scale(1.05,.92) translateX(2px)}40%{transform:translateY(-10px)}48%{transform:none}60%{transform:rotate(-4deg)}70%{transform:rotate(3deg)}80%{transform:none}}
 </style>
 </head>
 <body>
@@ -1155,6 +1163,8 @@ function wylosujNiespodzianke(){
   ostatnieNiespodzianki = [n.id, ...ostatnieNiespodzianki].slice(0, 5);
   return n;
 }
+// tęczowa kupka jednorożca (wycinanka): trzy zawijasy w kolorach tęczy, czubek i wesoła buzia
+const KUPKA = `<svg viewBox="0 0 100 90" aria-hidden="true"><g filter="url(#brzeg)"><ellipse cx="50" cy="80" rx="44" ry="10" fill="#B4D8D4"/><path d="M10 80C6 66 18 58 30 60L70 60C84 58 96 68 90 80Z" fill="#A299B8"/><path d="M18 62C14 50 26 42 36 44L64 44C76 42 86 52 80 62Z" fill="#6E9FC9"/><path d="M26 46C24 36 34 30 42 31L60 31C70 30 76 38 72 46Z" fill="#C4C66A"/><path d="M34 33C32 24 40 19 47 20L56 20C64 20 66 27 62 33Z" fill="#EFD353"/><path d="M42 22C40 14 46 8 52 6C50 12 58 14 56 22Z" fill="#DD785B"/></g><ellipse cx="40" cy="52" rx="3.6" ry="4.4" fill="#2E2846"/><ellipse cx="60" cy="52" rx="3.6" ry="4.4" fill="#2E2846"/><path d="M44 63q6 6 12 0" fill="none" stroke="#2E2846" stroke-width="2.4" stroke-linecap="round"/><circle cx="34" cy="60" r="3.4" fill="#E07AA8" opacity=".6"/><circle cx="66" cy="60" r="3.4" fill="#E07AA8" opacity=".6"/></svg>`;
 const SERCE = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 90C20 68 6 50 6 31C6 16 17 6 30 6c9 0 16 5 20 13c4-8 11-13 20-13c13 0 24 10 24 25c0 19-14 37-44 59z" fill="currentColor"/><ellipse cx="28" cy="28" rx="7" ry="11" fill="#fff" opacity=".4" transform="rotate(-30 28 28)"/></svg>`;
 const GWIAZDA = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 6l13 28 30 4-22 21 6 30-27-15-27 15 6-30L7 38l30-4z" fill="currentColor"/></svg>`;
 const progRundyOk = r => r.dobre >= progRundy(r.wszystkie);
@@ -1555,6 +1565,8 @@ const SZTUCZKI = {
   aha: { czas: 1800, mina: "aha" },
   drzemka: { czas: 3200, mina: "spi" },
   psik: { czas: 1500, mina: "zamk", efekt: () => brokat(12, 3 + Math.floor(Math.random() * 50), "brokat brokat-wybuch") },
+  // TYMCZASOWO (na życzenie córki): tęczowa kupka. Żeby usunąć, wystarczy skasować tę jedną linijkę.
+  kupka: { czas: 3600, mina: "zamk", efekt: () => `<span class="hero-kupka">${KUPKA}${brokat(6, 77, "brokat")}</span>` },
   serduszka: { czas: 2200, mina: "szczesl", efekt: () => [0, 1, 2, 3].map(i => `<span class="hero-serce" style="left:${20 + i * 18}%;animation-delay:${(i * .22).toFixed(2)}s;color:${["#E07AA8", "#D5503F", "#8B5CC4", "#DD785B"][i]}">${SERCE}</span>`).join("") }
 };
 let ostatnieSztuczki = [];
