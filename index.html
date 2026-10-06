@@ -586,6 +586,13 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @keyframes kupkaSpada{0%,30%{opacity:0;transform:translateY(-120%) scale(.3)}36%{opacity:1}46%{transform:translateY(0) scale(1.15,.8)}54%{transform:scale(.95,1.08)}60%,85%{opacity:1;transform:none}100%{opacity:0;transform:scale(.8)}}
 @media (prefers-reduced-motion:no-preference){.hero[data-s="kupka"] .pegaz{animation:szKupka 3.6s ease-in-out}}
 @keyframes szKupka{0%,100%{transform:none}10%,32%{transform:scale(1.05,.92)}14%,22%{transform:scale(1.05,.92) translateX(-2px)}18%,26%{transform:scale(1.05,.92) translateX(2px)}40%{transform:translateY(-10px)}48%{transform:translateX(-18%)}54%{transform:translateX(-26%) translateY(-6px)}60%,82%{transform:translateX(-30%)}66%{transform:translateX(-30%) rotate(-4deg)}74%{transform:translateX(-30%) rotate(3deg)}}
+.hero-efekt:has(.hero-bak){z-index:3}
+.hero-bak{position:absolute;left:62%;top:44%;width:32%;height:34%;opacity:0;animation:bakChmura 3s ease-out forwards}
+.hero-bak i{position:absolute;left:14%;top:34%;width:42%;aspect-ratio:1;border-radius:50%;opacity:.8;transform:translate(var(--x),var(--y)) scale(var(--s))}
+.hero-bak .brokat{position:absolute;inset:-30% -20%;z-index:1}
+@keyframes bakChmura{0%,20%{opacity:0;transform:scale(.2)}28%{opacity:1;transform:scale(1.2)}60%{opacity:1;transform:translate(10px,-24px) scale(1.4)}100%{opacity:0;transform:translate(20px,-50px) scale(1.7)}}
+@media (prefers-reduced-motion:no-preference){.hero[data-s="bak"] .pegaz{animation:szBak 3s ease-in-out}}
+@keyframes szBak{0%,100%{transform:none}10%,18%{transform:rotate(4deg) scale(1.03,.96)}22%{transform:translateX(-14%) translateY(-14px) rotate(-6deg)}32%{transform:translateX(-22%) rotate(-2deg)}40%,70%{transform:translateX(-22%)}46%,58%{transform:translateX(-22%) translateY(-4px) rotate(-3deg)}52%,64%{transform:translateX(-22%) rotate(3deg)}}
 </style>
 </head>
 <body>
@@ -1566,6 +1573,7 @@ const SZTUCZKI = {
   drzemka: { czas: 3200, mina: "spi" },
   psik: { czas: 1500, mina: "zamk", efekt: () => brokat(12, 3 + Math.floor(Math.random() * 50), "brokat brokat-wybuch") },
   // TYMCZASOWO (na życzenie córki): tęczowa kupka. Żeby usunąć, wystarczy skasować tę jedną linijkę.
+  bak: { czas: 3000, mina: "zamk", efekt: () => `<span class="hero-bak">${["#E07AA8", "#EFD353", "#B4D8D4", "#D2CBE3", "#EA994D"].map((c, i) => `<i style="background:${c};--x:${[0, 50, -30, 80, 25][i]}%;--y:${[0, -40, -55, 25, -90][i]}%;--s:${[1, .85, .75, .7, .6][i]};animation-delay:${(i * .06).toFixed(2)}s"></i>`).join("")}${brokat(12, 91)}</span>` },
   kupka: { czas: 3600, mina: "zamk", efekt: () => `<span class="hero-kupka">${KUPKA}${brokat(6, 77, "brokat")}</span>` },
   serduszka: { czas: 2200, mina: "szczesl", efekt: () => [0, 1, 2, 3].map(i => `<span class="hero-serce" style="left:${20 + i * 18}%;animation-delay:${(i * .22).toFixed(2)}s;color:${["#E07AA8", "#D5503F", "#8B5CC4", "#DD785B"][i]}">${SERCE}</span>`).join("") }
 };
