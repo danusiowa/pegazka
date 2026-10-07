@@ -208,7 +208,11 @@ svg.jabl{width:18px;height:18px;flex:none}
 .tiles{gap:12px}
 .tile{aspect-ratio:auto;min-height:150px;justify-content:flex-end;padding:12px 14px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;text-align:left;border-radius:22px}
 .tile .kart{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:84%;height:auto;max-height:66%}
-.tile .tnazwa{font-size:19px;line-height:1.1;position:relative}
+/* napis na kafelku zawsze mieści się obok przycisku ▶ (długie słowa same się zmniejszają) */
+.tile{container-type:inline-size}
+.tile .tnazwa{font-size:min(19px,calc((100cqi - 50px) / (var(--n,6) * .72)));line-height:1.1;position:relative;max-width:calc(100% - 46px);white-space:nowrap}
+/* wąski kafelek (telefon): bez ▶, napis ma całą szerokość; cały kafelek i tak jest przyciskiem */
+@container (max-width:190px){.tiles .tile .graj{display:none}.tile .tnazwa{max-width:100%;font-size:min(19px,calc(100cqi / (var(--n,6) * .66)))}}
 .tile .graj{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;background:rgba(252,247,242,.75);display:grid;place-items:center;color:var(--ciemny)}
 .tile .graj svg{width:18px;height:18px}
 .dzial{font-size:16px;margin:4px 0 -6px}
@@ -284,7 +288,7 @@ svg.jabl{width:18px;height:18px;flex:none}
 @media (min-width:700px){
   .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
   .tile{min-height:200px;padding:16px 18px}
-  .tile .tnazwa{font-size:26px}
+  .tile .tnazwa{font-size:min(26px,calc((100cqi - 60px) / (var(--n,6) * .66)));max-width:calc(100% - 56px)}
   .tile .graj{width:48px;height:48px;right:14px;bottom:14px}
   .card{min-height:360px}
   .card .label{font-size:20px}
@@ -1300,7 +1304,7 @@ function start(){
     const [bg, fg] = kolorTematu(t, i);
     return `<button class="tile" style="background:${bg};color:${fg}" data-act="runda" data-t="${t.id}" aria-label="${esc(t.nazwa)}">
       ${kafelArt(t)}
-      ${t.krotko ? `<span class="mega tnazwa">${esc(t.krotko)}</span>` : ""}
+      ${t.krotko ? `<span class="mega tnazwa" style="--n:${[...t.krotko].length}">${esc(t.krotko)}</span>` : ""}
       <span class="graj" aria-hidden="true">${ICO_DALEJ}</span>
     </button>`;
   };
